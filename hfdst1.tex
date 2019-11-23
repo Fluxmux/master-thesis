@@ -5,5 +5,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Introduction}
+Deep learning based object detection on images is a hot topic for researchers and interest in machine learning is steadily growing among miscellaneous businesses.
+\newline
+Secure multiparty computation (MPC) is a subfield of cryptography, making it possible for a party to run an algortihm on confidential data, that is supposed to stay unknown even to the party running the algorithm.
+\newline
+Both concepts aren't new concepts, but with the rise of big data and processing power, there has been an increase in research into these fields.
+\newline
+In this thesis we present the applicability of MPC for deep learning based object detection.
+
 \section{Problem}
+The use of third party MLaaS (Machine Learning as a Service) providers or any cloud computing solution, as processing power for an image classification task, raises privacy concerns as sensitive images of users need to be sent to servers running an instance of the neural network. It's important to note that the transport of the image from the client to the server is secure, since the parties can make use of reliable HTTPS (Hypertext Transfer Protocol Secure) connections. The user's images, however, are stored in plaintext on the server, aswell as the computed output of the image. Furthermore the whole design of the neural network including all trained parameters needs to be stored on the servers of the third party, for the image classifier to function. Both of these remote storage solutions require a considerably amount of trust in the third party. Since the third party could potentially exploit the user data for commercial purposes or even steal the intellectual property of the image classifier. In this thesis we try to tackle the need to trust a third party MLaaS provider. We want it to compute an encrypted image on an obfuscated neural network to ouput a correct encrypted result.
+
 \section{Hypothesis}
+\paragraph{How can we securely compute deep learning based object detection algorithms for privacy preserving image classification?}\mbox{} \\
+With the use of MPC protocols we can implement methods such that we can compute a whole neural network in the secure field. We predict a drastically decrease in perfomance and will try to find performance optimizations along the way of implementing a proof of concept.

@@ -6,26 +6,53 @@
 
 \chapter{Literature study}
 
-\section{Background concepts}
-\subsection{Deep learning}
-\subsection{Cryptography}
-
 \section{Convolutional neural network}
-\subsection{Architecture}
-\subsubsection{Convolution layer}
-\subsubsection{Activation function}
-\subsubsection{Pooling layer}
-\subsubsection{Fully connected layer}
-\subsubsection{Loss function}
-\subsection{Evaluation}
+Convolution neural networks (CNN) is a special type of neural network used for images. The spatial properties of the pixels in the image are used during the evaluation of the input, meaning the neighbouring pixels of a central pixel impact the output to the next layer of that central pixel while pixels further away do not.
+CNNs are made of multiple layers. Typically, as you move further from the input layer to the output layer the dimensionality reduces, we can say the input gets mapped on a desired output manifold. Inputs that we classify as similar are supposed to be in the same region in the output manifold.
+
+\subsection{Convolution layer}
+In this layer a discrete convolution of a kernel $K$ shifting over an image $I$ is performed, as shown in equation \ref{eq:1}. The kernel has parameters also called weights, so that certain features get extracted from the input.
+\begin{equation} \label{eq:1}
+  (I*K)[m,n]=\sum_j\sum_k I[m-j,n-k]K[j,k]
+\end{equation}
+The output of this layer is a convolved feature map.
+
+\subsection{Activation function}
+Since these convolutions are simple lineair operations and most image classification tasks require non-lineair classifiers, non-lineairity needs to be added to the neural network. This is achieved through adding a non-linear activation function after a convolution or fully connected layer. The most popular activation function is the rectified linear unit (ReLU) as seen in equation \ref{eq:2}.
+\begin{equation} \label{eq:2}
+  f(x)=max(0,1)
+\end{equation}
+
+\subsection{Pooling layer}
+The dimensionality reduction we talked about in the beginning of this chapter happens in the pooling layer. A kernel is shifted over the image. In the case of max pooling the kernel selects the maximum value of the portion of the image it covers, to create the new dimensionality reduced image.
+
+\subsection{Fully connected layer}
+The fully connected layer is a multilayer perceptron that discriminates different object classes and identifies identical ones. All elements in vector $h_{i-1}^{out}$ have their own bias $B_i$ and weight $W_i$ so that $h_i^{in}$ can be calculated for each layer $i$ according to equation \ref{eq:3}.
+\begin{equation} \label{eq:3}
+  h_i^{in} = h_{i-1}^{out} \cdot W_i + B_i
+\end{equation}
 
 \section{Secure multiparty computation}
+Secure multiparty coputation is a protocol that is used between $n$ number of parties $P$. Each of these parties has private data also called a secret $S$. With MPC it is possible for these parties to compute a public\footnote{public or global means known to all parties, while private or local means known only by the corresponding party} function $f$ on the secrets. Such that a party $p_i \in P$ only knows his secret $s_i \in S$ and the public securely computed output $f(s_0,s_2,s_{n-1})$ after the protocol has succesfully finished.
+\newline
+A classic application is Yao's Millionaires' problem \cite{yao1982protocols} in wich two millionaires wish to know who is richer, there is catch however. Instead of making their balances publicly known. They wish to keep their balances a secret. In this case the number of parties $n$ is 2 the secrets $s_0$ and $s_1$ are their balances. The public function $f(s_0,s_1)=1$ if $s_0<s_1$ and $0$ otherwise.
+
+We categorize 2 types of parties based on their willingness to deviate from the correct predefined protocol.
+\begin{itemize}
+  \item Honest but curious parties (passive): Parties wish to know other parties secrets but will not deviate from the protocol at any time.
+  \item Malicious parties (active): Parties wish to know other parties secrets and wish to change output of computation to favourable result. Parties will deviate from the protocol to cheat and change the outcome at any time.
+\end{itemize}
+
+If the two millionaires are honest but curious parties, they will not deviate from the protocol and they will computer the correct output as a result they will know who is the richer millionair but they won't know how much money the other one has. In the other case one of the two millionaires is corrupt and acts maliciously, the honest millionair will follow protocol while the dishonest millionair will deviate from the protocol to change the result in his favour. In the event that the dishonest millionair is poorer he will change the outcome thus appearing richer.
+From now on, we assume the parties are honest but curious parties, unless specified otherwise. We also assume communication between parties to be secure.
+
 \subsection{Secret sharing}
+
+
+
 \subsection{Operations}
 \subsubsection{Artithmetic operators}
 \subsubsection{Relational operators}
 \subsection{Share recombination}
-
-\section{Malicious adverseries}
 
 \section{Conclusion}
