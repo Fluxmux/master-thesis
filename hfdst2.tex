@@ -44,11 +44,18 @@ We categorize 2 types of parties based on their willingness to deviate from the 
 \end{itemize}
 
 If the two millionaires are honest but curious parties, they will not deviate from the protocol and they will computer the correct output as a result they will know who is the richer millionair but they won't know how much money the other one has. In the other case one of the two millionaires is corrupt and acts maliciously, the honest millionair will follow protocol while the dishonest millionair will deviate from the protocol to change the result in his favour. In the event that the dishonest millionair is poorer he will change the outcome thus appearing richer.
-From now on, we assume the parties are honest but curious parties, unless specified otherwise. We also assume communication between parties to be secure.
+From now on, we assume the parties are honest but curious parties, unless specified otherwise. We also assume the communication between the different parties to be secure.
 
 \subsection{Secret sharing}
+In order to do secure computing, the parties need to split their secret into secret shares. A secret sharing method can be used by the secret holder to split a secret into a number of shares. Combining these shares will reveal the secret, while individual shares alone will leak nothing about the secret. In a $(t,n)$ threshold secret sharing sheme parties must combine atleast $t$ shares of the total $n$ shares, to obtain the secret. We can now set a threshold $t$ high enough, denying the secret to small curious parties and allowing to reveal the secret when a majority ($\geq t$) consensus is reached. Shamir's secret sharing scheme \cite{shamir1979share} is based on polynomial interpolation and the essential idea is that it takes atleast $t$ points in order to define a polynomial $p(x)$ of degree $t-1$. Given a set of $t$ points in a 2-dimensional carthesian system  $(x_1, y_1), (x_2, y_2), ..., (x_t,y_t)$, there exists only one polynomial of degree $t-1$. This can be proven and the mathematical construction of a polynomial $p(x)$ of degree $t-1$ based on a set of $t$ points can be calculated using Lagrange's interpolation formula \ref{eq:5}.
 
+\begin{equation} \label{eq:5}
+\begin{aligned}
+  p(x)= \sum_{i=1}^{t}y_{i}\delta_{i}(x)\text{\space\space\space\space with\space\space }\delta_{i}(x)=\prod_{1\leq j<t; i\neq j} \frac{x-x_i}{x_j-x_i}
+\end{aligned}
+\end{equation}
 
+With this in mind, a secret dealer can now share his secret $s$ to $n$ parties by choosing a random $t-1$ degree polynomial $p(x)=a_{0} + a_{1}x + ... + a_{t-1}x^{t-1}$ in which $a_{0}$ is the secret or the number representation of the secret if the secret is not a number. The dealer now calculates $n$ points on the polynomial starting from $x=1$, because the secret is located at $x=0$. Each party $p_i \in {p_1, p_2, ..., p_n}$ is given a different single point $(x_i,y_i)$, at this stage the secret is shared. To recombine the secret, the parties simply broadcast or send their shares to a central entity, if more than $t$ shares are known, it suffices to calculate the Lagrange polynomial $p(x)$ and $s=p(0)$. In the case of not having enough shares, the Lagrange polynomial becomes impossible to calculate since every polynomial is equally likely, thus revealing absolutely nothing about the secret.
 
 \subsection{Operations}
 \subsubsection{Artithmetic operators}
