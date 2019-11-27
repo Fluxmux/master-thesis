@@ -1,4 +1,2 @@
-Praktische voorbeelden die de theorie rond mpc bijstaven?
-Zelfgemaakte algortime in code? (pseudocode?)
-Ideeën van gelezen papers..
-bewijs van lagrange interpolatie van wikipedia citeren?
+How are the secret values (input) shared? (shamir secretsharing???)
+Why do we use finite fields instead of normal infinite fields?
