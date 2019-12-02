@@ -1,2 +1,3 @@
-How are the secret values (input) shared? (shamir secretsharing???)
-Why do we use finite fields instead of normal infinite fields?
+Where do we use finite fields?
+Round complexity? Notations?
+What say over Onespan? Pradip? Carlton? other colleagues?

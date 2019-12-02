@@ -92,7 +92,8 @@ Since Shamir's secrete sharing scheme is a linear sharing scheme, each party $Pi
   \item \textbf{Addition of multiple secrets ($[c] \gets [a] \cdot [b]$):} Each party $P_i$ locally adds it's secret shares $[a]_i$ and $[b]_i$, resulting in the new share $[c]_i = [a]_i + [b]_i$.
 \end{itemize}
 
-The last operation is visually demonstrated in figure \ref{fig:addsecrets}. In this example secret $a=1$ (green) and secret $b=3$ (red). After each party $P_i$ locally computes the addition of $[a]_i$ and $[b]_i$ and stores it as a new share $[c]_i$. After broadcasting the new, computated share $[c]$. They can recombine the shares via Lagrange interpolation to get the output of the addition of the two secrets $a$ and $b$. This happens all with zero knowledge about $a$ or $b$.
+The last operation is visually demonstrated in figure \ref{fig:addsecrets}. In this example secret $a=1$ (green) and secret $b=3$ (red). After each party $P_i$ locally computes the addition of $[a]_i$ and $[b]_i$ and stores it as a new share $[c]_i$. After broadcasting the new, computated share $[c]$. They can recombine the shares via Lagrange interpolation to get the polynomial of the combined shares $[c]$ and more importantly the output of the addition of the two secrets $a$ and $b$. This happens all with zero knowledge about $a$ or $b$. Since the computations are done locally no communication other than the inital share distribution is needed, the round complexity is 1.
+%TODO verify round complexity
 
 \begin{figure}
   \includegraphics[width=\linewidth]{plots/addsecrets.png}
@@ -100,8 +101,8 @@ The last operation is visually demonstrated in figure \ref{fig:addsecrets}. In t
   \label{fig:addsecrets}
 \end{figure}
 
-\paragraph{Addition}
-\paragraph{Multiplication}
+The inverse operations (subtraction and division) are possible too, and the protocol is the same.
+
 \subsubsection{Relational operators}
 
 \section{Related work}
