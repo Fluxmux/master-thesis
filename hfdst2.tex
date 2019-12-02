@@ -101,7 +101,22 @@ The last operation is visually demonstrated in figure \ref{fig:addsecrets}. In t
   \label{fig:addsecrets}
 \end{figure}
 
-The inverse operations (subtraction and division) are possible too, and the protocol is the same.
+The inverse operations (subtraction and division) are possible too, and the protocol is the same.\\
+Multiplication of two secret values is more challenging since it isn't a linear operation. Their are multiple methods to perform secret multiplication, the method described in \cite{ben1988completeness} also called the BGW protocol (initials of the authors) has to solve two problems along the way of computing $c = a \cdot b$. Assume $a$ and $b$ are respectively encoded by $f(x)$ and $g(x)$ and $n \geq 2t + 1$. The free coefficient of $h(x) = f(x) \cdot g(x)$ is simply $h(0) = f(0) \cdot g(0)$, this means a simple multiplication of the polynomials would be sufficient to compute the multiplication of the secrets. There is however a major problem, multiplication of two polynomials of degree $t$ yields a polynomial of degree $2t$.
+
+While this poses no problem with interpolating $h(x)$ from it's shares $[c]$ since $n \geq 2t + 1$, further multiplications will continue to raise the degree to a level where $t>n$ making it impossible to interpolate the resulting polynomial $h(x)$. The second problem is harder to spot.
+The polynomial $h(x)$ as a result of the multiplication of polynomials $f(x)$ and $g(x)$ is reducible (since it's a multiplication).
+
+In other words $f(x)$ and $g(x)$ are uniformly random polynomials of degree $t$, but $h(x)$ as a multiplication of two random polynomials is not irreducible, therefore $h(x)$ is not uniformly random. To make sure the resulting polynomial stays of degree $t$ and is uniformly random, the parties run a protocol to generate a random polynomial of degree $2t$.
+This protocol works as follows. Each party $P_i$ randomly selects a private polynomial $q_i(x)$ with secret $q_i(0) = 0$ of degree $2t$ and distributes it's shares among the parties. Each party $P_i$ now has $n$ random shares $[q]_i^k$ (with $k: 1 \rightarrow n$). After each party adds all it's random shares they hold a secret, truly random polynomial $q(x)$ with a zero as free coefficient $q(0) = 0$.
+
+Each party $P_i$ now computes the multiplication of the two secret values $[a]$ and $[b]$ and instead of using $[c]$ encoded as $h(x)$ we can add the random polynomial to the result, thus randomizing the coefficients and making the polynomial uniformly random. This will not mess up the result as now $a \cdot b$  is $(f(0) \cdot g(0)) + q(0)$ and $q(0)$ equals zero. This step is also called the randomization step.
+
+
+The parties now run a protocol to reduce the degree of $h(x)$ to $t$. This protocol can be computed locally (no communication is required) by multiplying the shares of the polynomial $h(x)$ to a specific, matrix of constants. This will truncate the result $h(x)$ of degree $2t$ to a polynomial of degree $t$. Proof for this degree reduction step can be found in the study by \cite{asharov2017full}.
+
+
+After these two steps the parties now hold $c =a \cdot b$ encoded by $h(x)$ of degree $t$ with coefficients uniformly distributed. They can now recombine their shares to find the polynomial $h(x)$ and the product of $a$ and $b$, $h(0)$.
 
 \subsubsection{Relational operators}
 
