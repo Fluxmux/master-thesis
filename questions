@@ -2,3 +2,8 @@ Where do we use finite fields?
 Round complexity? Notations?
 What say over Onespan? Pradip? Carlton? other colleagues?
 Which multiplication protocol in thesis? beaver tripples, bgw, ...?
+Equality test why not simply check if a - b = 0?
+Can you securely evaluate a = 0?
+Comparision?
+Other operators?
+something else?
