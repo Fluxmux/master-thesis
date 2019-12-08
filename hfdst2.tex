@@ -54,6 +54,17 @@ The fully connected layers usually comes after the last convolution layer. The o
 
 When all these layers are connected to eachother, as you can see in figure \ref{fig:cnn}, we speak of a model with a CNN architecture.
 
+\subsection{Face matching}
+Face matching is an algorithm that tries to match two faces of the same person. Face matching can be performed with convolutional neural networks an image gets fed to the network and produces an output vector depending on what face was in the image. \cite{koch2015siamese} showed that a siamese neural network makes it possible to not only recognise new data (unseen during the training) but to also recognise entirely new classes. In the case of face matching each person's face is a class. With siamese neural networks it is thus possible to recognise faces of persons which the network didn't see during training. \\
+
+A siamese neural network consists of two CNN's. These CNN's are identical. A siamese neural network has to be fed two images, it then produces two output vectors. When these two images have faces that are similar the euclidean distance between the two output vectors will be small. When the two faces on the images are dissimilar, the euclidean distance between the two vectors is large. Thus to determine if two images are of the same person, we calculate the euclidean distance between the two output vectors, if the distance lies under a certain threshold we accept that the two faces belong to the same person. If one output vector of the two images is stored in a database, an application can use this algorithm to allow for biometric authentication. This output vector is also referred to as the embedding of the face. A general overview of a siamese neural network architecture can be found in figure \ref{fig:siamese}.
+
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{fig/siamese.png}
+  \caption{Overview of siamese neural network}
+  \label{fig:siamese}
+\end{figure}
+
 \section{Secure multiparty computation}
 Secure multiparty coputation is a protocol that is used between $n$ number of parties $P$. Each of these parties has private data also called a secret $S$. With MPC it is possible for these parties to compute a public\footnote{public or global means known to all parties, while private or local means known only by the corresponding party} function $f$ on the secrets. Such that a party $P_i \in P$ only knows his secret $s_i \in S$ and the public securely computed output $f(s_0,s_2,s_{n-1})$ after the protocol has succesfully finished.
 \newline
@@ -188,9 +199,9 @@ With this set of protocols we can transform any basic CNN to a secure one. In fi
 \end{figure}
 
 \section{Related work}
-Erkin et al. presented in \cite{erkin2009privacy} for the first time a privacy-preserving face recognition alogithm using MPC, this was before the rise of machine learning. Thus they were restricted to using eigenvalues of the faces described in \cite{turk1991face}. They show that their privacy-preserving face recognition algorithm is as reliable as the normal face recognition algorithm. Unfortunately, the computational cost for producing the eigenvalues of an image is way less than producing a result for a CNN.\\
+\cite{erkin2009privacy} presented for the first time a privacy-preserving face recognition alogithm using MPC, this was before the rise of machine learning. Thus they were restricted to using eigenvalues of the faces described in \cite{turk1991face}. They show that their privacy-preserving face recognition algorithm is as reliable as the normal face recognition algorithm. Unfortunately, the computational cost for producing the eigenvalues of an image is way less than producing a result for a CNN.\\
 
-Mainali et al. recently published the first framework for privacy-ehancing fall detection from a body-worn inertial measurement unit using traditional machine learning and MPC. The data they work with is time-series inertial measurements this has a significantly lower dimensionality than an image. Traditional machine learning classifiers require less computations than deep neural networks. They hint to secure video-based fall detection as part of future research and to which extent secure video-based fall detection can be performed real-time with high-dimensionality.
+\cite{mainali2019privacy} recently published the first framework for privacy-ehancing fall detection from a body-worn inertial measurement unit using traditional machine learning and MPC. The data they work with is time-series inertial measurements this has a significantly lower dimensionality than an image. Traditional machine learning classifiers require less computations than deep neural networks. The authors hint to secure video-based fall detection as a possibility future research and to which extent secure video-based fall detection can be performed real-time with high-dimensionality.
 
 
 \section{Conclusion}
