@@ -5,21 +5,34 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Introduction}
-Deep learning based object detection on images is a hot topic for researchers and interest in machine learning is steadily growing among miscellaneous businesses. Facial recognition is one of the many applications of machine learning. A face recognition algorithm tries to recognise faces of the same person. Face mathing can be used as means to do biometric authentication. In this case a client sends a picture of his face to an external service which grant him access if the face is similar to the one stored in the database.
+Deep learning based object detection on images is a hot topic for researchers and interest in machine learning is steadily growing among miscellaneous businesses. Facial recognition is one of the many applications machine learning has to offer. A face recognition algorithm tries to recognise faces of the same person. Faces are very unique parts of our body, thus face mathing can be used as means to do biometric authentication. In this case, a client sends a picture containing it's face to an external service which grant the client access if the face is similar to the one stored in the database.
 
-Secure multiparty computation (MPC) is a subfield of cryptography, making it possible for a party to run an algortihm on confidential data, that is supposed to stay unknown even to the party running the algorithm. There exist different methods to perform privacy-preserving computations, MPC is the one will mostly use.
+Secure multiparty computation (MPC) is a subfield of cryptography, making it possible for a party to run an algortihm on confidential data, that is supposed to stay unknown even to the party running the algorithm. There exist different methods to perform privacy-preserving computations, MPC is the one we will use.
 
-Both concepts aren't new concepts, but with the rise of big data and processing power, there has been an increase in research into these fields. Onespan (formerly VASCO Data Security International, Inc.) is the company were most of our study was done. Onespan offers a series of security and authentication products and technologies \footnote{Onespan's official website: \url{www.onespan.com}}. It's also active in different fields of research and innovation.
+Both concepts aren't new concepts, but with the rise of big data and processing power, there has been an increase in research into these fields.
 
-In this thesis we study the applicability of MPC protocols for deep learning based face matching.
+More and more users are concerned about their privacy and the security of their data stored and processed on servers. Not only are they afraid of malicious hackers stealing their sensitive data, they also fear the servers operator will use their data for purposes other than the user agreed to. Big corporations have been found guilty of collecting user data for unethical purposes.
+
+Because of these concerns researchers are looking for technologies to enhance the privacy of the user during the processing of it's data on a server.
+
+Onespan\footnote{Onespan's official website: \url{www.onespan.com}} (formerly VASCO Data Security International, Inc.) is a global company were most of our research was done. Onespan offers a series of security and authentication products and technologies and specializes in digital identity and anti-fraud solutions. The company continues to be active in research and innovation in different fields of technology, especially cryptography and data science.
+
+In this thesis we study the applicability of MPC protocols on deep learning based face matching and try to implement a privacy-preserving face matching alogrithm.
 
 \section{Problem}
 The use of third party MLaaS (Machine Learning as a Service) providers or any cloud computing solution, as processing power for an image classification task, raises privacy concerns as sensitive images of users need to be sent to servers running an instance of the neural network.
 
-It's important to note that the transport of the image from the client to the server is deemed to be secure, since the parties can make use of reliable HTTPS (Hypertext Transfer Protocol Secure) connections. The user's images, however, are stored in plaintext on the server, aswell as the computed output of the image. Furthermore the whole design of the neural network including all trained parameters needs to be stored on the servers of the third party, for the image classifier to function. Both of these remote processing solutions require a considerably amount of trust in the third party. Since the third party could potentially exploit the user data for commercial purposes or even steal the intellectual property of the image classifier. In this thesis we try to tackle the need to trust a third party MLaaS provider. We want it to compute an encrypted image on an obfuscated neural network to ouput a correct encrypted result. This encrypted result shall be sent to the client, which will then decrypt it.
+It's important to note that the transport of the image from the client to the server is deemed to be secure, since the parties can make use of reliable HTTPS (Hypertext Transfer Protocol Secure) connections.
+
+The user's images, however, are stored in plaintext on the server, aswell as the computed output of the image.
+
+Furthermore the whole design of the neural network including all trained parameters needs to be stored on the servers of the third party, for the image classifier to function. Both of these remote processing solutions require a considerably amount of trust in the third party. Since the third party could potentially exploit the user data for commercial purposes or even steal the intellectual property of the image classifier. Of course most cloud computing service providers are not inherently malicious. But as long as the users data is stored in cleartext on the server, there is a risk that the service provider could turn malicious. 
+
+In this thesis we try to tackle the need to trust a third party MLaaS provider. We want it to compute an encrypted image on an obfuscated neural network to ouput a correct encrypted result. This encrypted result shall be sent to the client, which will then decrypt it.
 
 \section{Hypothesis}
-\paragraph{How can we securely compute the inference of a facial recognition neural network?}\mbox{} \\
-With the use of MPC protocols we can implement methods such that we can compute a whole face recognition convolutional neural network on an encrypted image of a face.
-\paragraph{How can we optimise the secure facial recognition task to run more efficient?}
-We predict a drastic decrease in perfomance when running interference on the privacy-preserving neural network. Will try to find performance optimizations along the way of implementing a proof of concept by looking at existing optimisation concepts for MPC aswell as neural networks.
+\paragraph{How can we securely compute the inference of a deep-learning based facial recognition neural network?}\mbox{} \\
+With the use of MPC protocols we can implement methods such that we can compute a whole face recognition convolutional neural network on an encrypted image of a face. This preserves the privacy of the user while allowing the computation to be outsourced to a untrusted third party.
+\paragraph{How can we optimise the secure facial recognition task to run more efficient?}\mbox{}
+\\
+We predict a drastic decrease in perfomance when running inference on the privacy-preserving neural network. We will try to find performance optimizations along the way of implementing a proof of concept by looking at existing optimisation concepts for MPC aswell as optimisation solutions for neural networks.
