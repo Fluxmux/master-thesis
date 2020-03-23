@@ -1,0 +1,37 @@
+\BOOKMARK [0][-]{chapter*.1}{Voorwoord}{}% 1
+\BOOKMARK [0][-]{chapter*.2}{Samenvatting}{}% 2
+\BOOKMARK [0][-]{chapter*.3}{Abstract}{}% 3
+\BOOKMARK [0][-]{chapter*.4}{Inhoud}{}% 4
+\BOOKMARK [0][-]{chapter*.5}{Figurenlijst}{}% 5
+\BOOKMARK [0][-]{chapter*.6}{Tabellenlijst}{}% 6
+\BOOKMARK [0][-]{chapter*.7}{Symbolenlijst}{}% 7
+\BOOKMARK [0][-]{chapter*.9}{Lijst met afkortingen}{}% 8
+\BOOKMARK [0][-]{chapter.1}{Introduction}{}% 9
+\BOOKMARK [1][-]{section.1.1}{Problem}{chapter.1}% 10
+\BOOKMARK [1][-]{section.1.2}{Hypothesis}{chapter.1}% 11
+\BOOKMARK [0][-]{chapter.2}{Literature study}{}% 12
+\BOOKMARK [1][-]{section.2.1}{Convolutional neural network}{chapter.2}% 13
+\BOOKMARK [2][-]{subsection.2.1.1}{Convolution layer}{section.2.1}% 14
+\BOOKMARK [2][-]{subsection.2.1.2}{Activation function}{section.2.1}% 15
+\BOOKMARK [2][-]{subsection.2.1.3}{Pooling layer}{section.2.1}% 16
+\BOOKMARK [2][-]{subsection.2.1.4}{Fully connected layer}{section.2.1}% 17
+\BOOKMARK [2][-]{subsection.2.1.5}{Face matching}{section.2.1}% 18
+\BOOKMARK [1][-]{section.2.2}{Secure multiparty computation}{chapter.2}% 19
+\BOOKMARK [2][-]{subsection.2.2.1}{Secret sharing}{section.2.2}% 20
+\BOOKMARK [2][-]{subsection.2.2.2}{Operations}{section.2.2}% 21
+\BOOKMARK [2][-]{subsection.2.2.3}{Number representation}{section.2.2}% 22
+\BOOKMARK [1][-]{section.2.3}{Overview}{chapter.2}% 23
+\BOOKMARK [1][-]{section.2.4}{Related work}{chapter.2}% 24
+\BOOKMARK [1][-]{section.2.5}{Conclusion}{chapter.2}% 25
+\BOOKMARK [0][-]{chapter.3}{Implementation}{}% 26
+\BOOKMARK [1][-]{section.3.1}{Specifications}{chapter.3}% 27
+\BOOKMARK [1][-]{section.3.2}{Design}{chapter.3}% 28
+\BOOKMARK [1][-]{section.3.3}{Conclusion}{chapter.3}% 29
+\BOOKMARK [0][-]{chapter.4}{Evaluation}{}% 30
+\BOOKMARK [1][-]{section.4.1}{Results}{chapter.4}% 31
+\BOOKMARK [2][-]{subsection.4.1.1}{Reliability results}{section.4.1}% 32
+\BOOKMARK [2][-]{subsection.4.1.2}{Timing results}{section.4.1}% 33
+\BOOKMARK [1][-]{section.4.2}{Discussion}{chapter.4}% 34
+\BOOKMARK [1][-]{section.4.3}{Conclusion}{chapter.4}% 35
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 36
+\BOOKMARK [0][-]{appendix.A}{Uitleg over de appendices}{}% 37
