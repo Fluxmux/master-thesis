@@ -1,2 +1,2 @@
-# Master thesis for ICT industrial engineering @KUL
+# Secure Face Matching
 ## WIP
