@@ -1,2 +1,3 @@
 # Secure Face Matching
-## WIP
+
+![alt text](https://github.com/Fluxmux/master-thesis/blob/master/fig/workflow.png)
