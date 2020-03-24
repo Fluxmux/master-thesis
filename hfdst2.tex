@@ -5,14 +5,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Literature study}
-In this chapter we will take a quick look at how convolutional neural networks (CNN) function, layer by layer. We will also learn how secure multiparty computation (MPC) in general is possible. Finaly, we will discuss the related work on combining these two subjects so far.
+In this chapter we will take a quick look at how convolutional neural networks (CNN) function, layer by layer. We will also learn how secure multiparty computation (MPC) in general is possible. Finally, we will discuss the related work on combining these two subjects so far.
+
+The reason we don't just train our network on encrypted images as input data. Is because machine learning is generally based on discovering statistical patterns in data and the whole point of encryption is to make sure there is no statistical patterns and with truly random data there is none (think of image noise figure \ref{fig:noise}). In addition there is no heuristic you can use to tell if you are getting close to a correct classification.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{fig/random_noise.jpg}
+  \caption{Random noise}
+  \label{fig:noise}
+\end{figure}
 
 \section{Convolutional neural network}
 Convolution neural networks (CNN) is a special type of neural network used for images. The spatial properties of the pixels in the image are used during the evaluation of the input, meaning the neighbouring pixels of a central pixel impact the output to the next layer of that central pixel while pixels further away do not.
-CNNs are made of multiple layers. Typically, as you move further from the input layer to the output layer the dimensionality reduces, we can say the input gets mapped on a desired output manifold. Inputs that we classify as similar are supposed to be in the same region in the output manifold. Neural networks go through two phases: training and interference. A neural network needs to be trained in order to achieve good results. After the training the network will try to predict things based on the inputted data, in this phase the parameters of the network do not chance.
+CNNs are made of multiple layers. Typically, as you move further from the input layer to the output layer the dimensionality reduces, we can say the input gets mapped on a desired output manifold. Inputs that we classify as similar are supposed to be in the same region in the output manifold. Neural networks go through two phases: training and inference. A neural network needs to be trained in order to achieve good results. After the training the network will try to predict things based on the inputted data, in this phase the parameters of the network do not change.
 
 \subsection{Convolution layer}
-In this layer a discrete convolution of a kernel $K$ shifting over an image $I$ is performed, as shown in equation \ref{eq:1}. The kernel has parameters also called weights, so that certain features get extracted from the input.
+In this layer a discrete convolution of a kernel $K$ shifting over an image $I$ is performed, as shown in equation \ref{eq:1}. The kernel has parameters also known as weights, so that certain features get extracted from the input.
 \begin{equation} \label{eq:1}
   (I*K)[m,n]=\sum_j\sum_k I[m-j,n-k]K[j,k]
 \end{equation}
@@ -25,15 +34,17 @@ Since these convolutions are simple lineair operations and most image classifica
 \end{equation}
 
 \begin{figure}[H]
-  \includegraphics[width=\linewidth]{plots/relu.png}
+  \center
+  \includegraphics[scale=0.3]{plots/relu.png}
   \caption{ReLu activation function}
   \label{fig:relu}
 \end{figure}
 
 \subsection{Pooling layer}
-The dimensionality reduction we talked about in the beginning of this chapter happens in the pooling layer. A kernel is shifted over the image. In the case of max-pooling the kernel selects the maximum value of the portion of the image it covers, to create the new dimensionality reduced image. A portion of the image value is theoretically lost, but because we only retain the maximum value in the window we sort of extract a feature from the input matrix. An example of this process can be seen in figure \ref{fig:pooling}
+The dimensionality reduction we talked about in the beginning of this chapter happens primarily in the pooling layer \footnote{Dimensionality reduction can also be combined with feature extraction in the convolution layer.}. A kernel is shifted over the image. In the case of max-pooling the kernel selects the maximum value of the portion of the image it covers, to create the new dimensionality reduced image. A portion of the image value is theoretically lost, but because we only retain the maximum value in the window we sort of extract a feature from the input matrix. An example of this process can be seen in figure \ref{fig:pooling}.
 \begin{figure}[H]
-  \includegraphics[width=\linewidth]{fig/maxpool.png}
+  \center
+  \includegraphics[scale=0.75]{fig/maxpool.png}
   \caption{Example of $2\times2$ max-pooling}
   \label{fig:pooling}
 \end{figure}
@@ -44,7 +55,7 @@ The fully connected layer is a multilayer perceptron that discriminates differen
   h_i^{in} = h_{i-1}^{out} \cdot W_i + B_i
 \end{equation}
 
-The fully connected layers usually comes after the last convolution layer. The output of a convolution layer is a tensor, this means that the output needs to be flattened to a one-dimensional array. The last layer of the fully connected layers is called the output layer. This output layer determines the classification.
+The fully connected layers usually come after the last convolution layer. The output of a convolution layer is a tensor, this means that the output needs to be flattened to a one-dimensional array. The last layer of the fully connected layers is called the output layer. This output layer determines the classification.
 
 \begin{figure}[H]
   \includegraphics[width=\linewidth]{fig/cnn.png}
@@ -52,12 +63,12 @@ The fully connected layers usually comes after the last convolution layer. The o
   \label{fig:cnn}
 \end{figure}
 
-When all these layers are connected to eachother, as you can see in figure \ref{fig:cnn}, we speak of a model with a CNN architecture.
+When all these layers are connected to each other, as you can see in figure \ref{fig:cnn}, we speak of a model with a CNN architecture. And if there are enough layers between the input layer and the output layer, we say the model is a Deep Neural Network (DNN).
 
 \subsection{Face matching}
 Face matching is an algorithm that tries to match two faces of the same person. Face matching can be performed with convolutional neural networks an image gets fed to the network and produces an output vector depending on what face was in the image. \cite{koch2015siamese} showed that a siamese neural network makes it possible to not only recognise new data (unseen during the training) but to also recognise entirely new classes. In the case of face matching each person's face is a class. With siamese neural networks it is thus possible to recognise faces of persons which the network didn't see during training.
 
-A siamese neural network consists of two CNN's. These CNN's are identical. A siamese neural network has to be fed two images, it then produces two output vectors. When these two images have faces that are similar the euclidean distance between the two output vectors will be small. When the two faces on the images are dissimilar, the euclidean distance between the two vectors is large. Thus to determine if two images are of the same person, we calculate the euclidean distance (equation \ref{eq:distance}) between the two output vectors, if the distance lies under a certain threshold we accept that the two faces belong to the same person. If one output vector of the two images is stored in a database, an application can use this algorithm to allow for biometric authentication. This output vector is also referred to as the embedding of the face or a point on a manifold. A general overview of a siamese neural network architecture can be found in figure \ref{fig:siamese}.
+A siamese neural network consists of two CNN's. These CNN's are identical. A siamese neural network has to be fed two images, it then produces two output vectors. When these two images have faces that are similar the euclidean distance between the two output vectors will be small. When the two faces on the images are dissimilar, the euclidean distance between the two vectors is large. Thus to determine if two images are of the same person, we calculate the euclidean distance (equation \ref{eq:distance}) between the two output vectors, if the distance lies under a certain threshold we accept that the two faces belong to the same person. If one output vector of the two images is stored in a database, an application can use this algorithm to allow for biometric authentication. This output vector is also referred to as the embedding of the face or a point on a manifold. A manifold is a topological space that locally resembles the Euclidean space near each point, this means that each point of that $n$-th dimensional manifold has a neighborhood that is homeomorphic to the Euclidean space of dimension $n$. This is great news, we can compare two embeddings on the manifold by calculating the Euclidean distance between the two points, the only condition is that the two points are in eachothers locality or neighborhood. A general overview of a siamese neural network architecture can be found in figure \ref{fig:siamese}.
 
 \begin{equation} \label{eq:distance}
   d(p,q) = \sqrt{\sum_{i=1}^{n}(q_{i}-p_{i})^{2}}
@@ -70,7 +81,7 @@ A siamese neural network consists of two CNN's. These CNN's are identical. A sia
 \end{figure}
 
 \section{Secure multiparty computation}
-Secure multiparty coputation is a protocol that is used between $n$ number of parties $P$. Each of these parties has private data also called a secret $S$. With MPC it is possible for these parties to compute a public\footnote{public or global means known to all parties, while private or local means known only by the corresponding party} function $f$ on the secrets. Such that a party $P_i \in P$ only knows his secret $s_i \in S$ and the public securely computed output $f(s_0,s_2,s_{n-1})$ after the protocol has succesfully finished.
+Secure multiparty coputation is a protocol that is used between $n$ number of parties $P$. Each of these parties has private data also called a secret $S$. With MPC it is possible for these parties to compute a public\footnote{Public or global means known to all parties, while private or local means known only by the corresponding party.} function $f$ on the secrets. Such that a party $P_i \in P$ only knows his secret $s_i \in S$ and the public securely computed output $f(s_0,s_2,s_{n-1})$ after the protocol has succesfully finished.
 \newline
 A classic application is Yao's Millionaires' problem \cite{yao1982protocols} in wich two millionaires wish to know who is richer, there is catch however. Instead of making their balances publicly known. They wish to keep their balances a secret. In this case the number of parties $n$ is 2 the secrets $s_0$ and $s_1$ are their balances. The public function $f(s_0,s_1)=1$ if $s_0<s_1$ and $0$ otherwise.
 
@@ -88,14 +99,14 @@ From now on, we assume the set of parties are a mix of honest and semi-honest pa
 
 The efficiency of an MPC protocol is defined by three metrics:
 \begin{itemize}
-  \item \textbf{round complexity:} The amount of rounds needed in the protocol. In one round each party can read all messages sent to the party in the previous round aswell as perform an arbitrary amount of local computation and finally send messages to all other parties.
+  \item \textbf{round complexity:} The amount of rounds needed in the protocol. In one round each party can read all messages sent to the party in the previous round as well as perform an arbitrary amount of local computation and finally send messages to all other parties.
   \item \textbf{communication complexity:} The amount of communication between all parties (measured in bits).
   \item \textbf{computational complexity:} The number of primitive operations performed by all parties.
 \end{itemize}
-In general, the computational complexity is very low while the communication complexity dominates the protocols total complexity. Thus an estimate of the overall complexity can be measured by combining the round and communication complexity. This means the efficiency of MPC protocols  is heavily based on the network's latency rather than the network's throughput.
+In general, the computational complexity is very low while the communication complexity dominates the protocol's total complexity. Thus an estimate of the overall complexity can be measured by combining the round and communication complexity. This means the efficiency of MPC protocols  is heavily based on the network's latency rather than the network's throughput.
 
 \subsection{Secret sharing}
-In order to do secure computing, the parties need to split their secret into secret shares. A secret sharing method can be used by the secret holder to split a secret into a number of shares. Combining these shares will reveal the secret, while individual shares alone will leak nothing about the secret. In a $(t,n)$ threshold secret sharing sheme parties must combine atleast $t$ shares of the total $n$ shares, to obtain the secret. We can now set a threshold $t$ high enough, denying the secret to small curious parties and allowing to reveal the secret when a majority ($\geq t$) consensus is reached. Shamir's secret sharing scheme \cite{shamir1979share} is based on polynomial interpolation and the essential idea is that it takes atleast $t$ points in order to define a polynomial $p(x)$ of degree $t-1$. Given a set of $t$ points in a 2-dimensional carthesian system  $(x_1, y_1), (x_2, y_2), ..., (x_t,y_t)$, there exists only one polynomial of degree $t-1$. This can be proven and the mathematical construction of a polynomial $p(x)$ of degree $t-1$ based on a set of $t$ points can be calculated using Lagrange's interpolation formula \ref{eq:5}.
+In order to do secure computing, the parties need to split their secret into secret shares. A secret sharing method can be used by the secret holder to split a secret into a number of shares. Combining these shares will reveal the secret, while individual shares alone will leak nothing about the secret. In a $(t,n)$ threshold secret sharing sheme parties must combine at least $t$ shares of the total $n$ shares, to obtain the secret. We can now set a threshold $t$ high enough, denying the secret to small curious parties and allowing to reveal the secret when a majority ($\geq t$) consensus is reached. Shamir's secret sharing scheme \cite{shamir1979share} is based on polynomial interpolation and the essential idea is that it takes at least $t$ points in order to define a polynomial $p(x)$ of degree $t-1$. Given a set of $t$ points in a 2-dimensional carthesian system  $(x_1, y_1), (x_2, y_2), ..., (x_t,y_t)$, there exists only one polynomial of degree $t-1$. This can be proven and the mathematical construction of a polynomial $p(x)$ of degree $t-1$ based on a set of $t$ points can be calculated using Lagrange's interpolation formula \ref{eq:5}.
 
 \begin{equation} \label{eq:5}
 \begin{aligned}
@@ -122,24 +133,24 @@ A Generalisation of this $(t,n)$-Shamir secret sharing scheme from thesis \cite{
   \item \textbf{Share Distribution:} For each $i \in {1, ..., n}$, the dealer sends $[s]_i$ to party $P_i$.
   \item \textbf{Secret Reconstruction:} Let $D \subset {1, ..., n}$ be a set of size $t + 1$. Each party $P_i$ for $i \in D$ sends his share $[s]_i$ to all parties. Then, each party reconstructs the secret via Lagrange interpolation.
 \end{enumerate}
-In figure \ref{fig:secretsharing} a visualisation of this scheme shows us that in order to get the secret value, $s=4$ in this case, we need to know atleast $t+1$ points for a given $t$. The trivial case where $t=0$ (green line) is simple to understand. The secret is simply the y-value of the given point. Of course this is a rather useless approach to secret sharing since you are giving away the cleartext secret. The full potential of secret sharing becomes true for cases where $t>0$. Two points are needed for a first order polynomial (red line), three points for a second order polynomial and so on.
+In figure \ref{fig:secretsharing} a visualisation of this scheme shows us that in order to get the secret value, $s=4$ in this case, we need to know at least $t+1$ points for a given $t$. Two points are needed to recombine a first order polynomial (red line), three points for a second order polynomial and so on.
 
-It's important to make sure the parties are distributed and to try minimizing the incentive to collude. Distribution is needed to lower the risk of having a malicious party taking over control of the network, this can be done by splitting the parties up to many small stakeholders instead of a couple centralized stakeholders. We can only totally avoid collusion if the secret holder partakes to the MPC.
+It's important to make sure the parties are distributed and to try minimizing the incentive to collude. Distribution is needed to lower the risk of having a malicious party taking over control of the network, this can be done by splitting the parties up to many small stakeholders instead of a couple centralized stakeholders. These stakeholders could be rival companies, local governments or even individual citizens. The only way to totally avoid collusion, is to let the secret holder partake to the MPC.  However, this is not wished, as we want the computation to be outsourced.
 
 \subsection{Operations}
 A neural network can be seen as an enormous function with millions of coefficients. Lucky for us the function can be broken up into 3 different operations: addition and multiplication in fully connected and convolution layers and a relational operator for max pooling and ReLU activation function. We will now show how to securely compute each of these basic operations.
 
 \subsubsection{Arithmetic operators}
-Addition, subtraction, division and multiplication all fall under the arithmetic operators. In this section we will take a look at how these operations can be performed in MPC.
+Addition, subtraction, division and multiplication all fall under arithmetic operations. In this section we will take a look at how these operations can be performed in MPC.
 \paragraph{linear protocols:}
-Since Shamir's secrete sharing scheme is a linear sharing scheme, each party $Pi$ can locally compute any linear combination of a public or secret value with their secret share $[s]_i$. This gives us following operations:
+Since Shamir's secrete sharing scheme is a linear sharing scheme, each party $P_i$ can locally compute any linear combination of a public or secret value with their secret share $[s]_i$. This gives us following operations:
 \begin{itemize}
   \item \textbf{Addition of secret and public value ($[c] \gets [a] + \beta$):} Each party $P_i$ locally adds the public value $\beta \in \mathbb{F}_q$ to it's share $[a]_i$, resulting in the new share $[c]_i = [a]_i + \beta$. Since all parties add the same $\beta$, this value is a constant.
   \item \textbf{Multiplication of secret and public value ($[c] \gets [a] \cdot \beta$):} Each party $P_i$ locally multiplies the public (constant) value $\beta \in \mathbb{F}_q$ with it's share $[a]_i$, resulting in the new share $[c]_i = [a]_i \cdot \beta$.
-  \item \textbf{Addition of multiple secrets ($[c] \gets [a] \cdot [b]$):} Each party $P_i$ locally adds it's secret shares $[a]_i$ and $[b]_i$, resulting in the new share $[c]_i = [a]_i + [b]_i$.
+  \item \textbf{Addition of multiple secrets ($[c] \gets [a] + [b]$):} Each party $P_i$ locally adds it's secret shares $[a]_i$ and $[b]_i$, resulting in the new share $[c]_i = [a]_i + [b]_i$.
 \end{itemize}
 
-The last operation is visually demonstrated in figure \ref{fig:addsecrets}. In this example secret $a=1$ (green) and secret $b=3$ (red). After each party $P_i$ locally computes the addition of $[a]_i$ and $[b]_i$ and stores it as a new share $[c]_i$. After broadcasting the new, computated share $[c]$. They can recombine the shares via Lagrange interpolation to get the polynomial of the combined shares $[c]$ and more importantly the output of the addition of the two secrets $a$ and $b$. This happens all with zero knowledge about $a$ or $b$. All of the computations are done locally and no communication other than the inital share distribution and the share reconstruction is needed.
+The last operation is visually demonstrated in figure \ref{fig:addsecrets}. In this example secret $a=1$ (green) and secret $b=3$ (red). After each party $P_i$ locally computes the addition of $[a]_i$ and $[b]_i$ and stores it as a new share $[c]_i$. After broadcasting the new, computed share $[c]$, they can recombine the shares via Lagrange interpolation to get the polynomial of the combined shares $[c]$ and more importantly the output of the addition of the two secrets $a$ and $b$. This happens all with zero knowledge about $a$ or $b$. All of the computations are done locally and no communication other than the inital share distribution and the share reconstruction is needed.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{plots/addsecrets.png}
@@ -157,7 +168,9 @@ Assume $a$ and $b$ are respectively encoded by $f(x)$ and $g(x)$ and $n \geq 2t 
 While this poses no problem with interpolating $h(x)$ from it's shares $[c]$ since $n \geq 2t + 1$, further multiplications will continue to raise the degree to a level where $t>n$ making it impossible to interpolate the resulting polynomial $h(x)$. The second problem is harder to spot.
 The polynomial $h(x)$ as a result of the multiplication of polynomials $f(x)$ and $g(x)$ is reducible (since it's a multiplication).
 
-In other words $f(x)$ and $g(x)$ are uniformly random polynomials of degree $t$, but $h(x)$ as a multiplication of two random polynomials is not irreducible, therefore $h(x)$ is not uniformly random. To make sure the resulting polynomial stays of degree $t$ and is uniformly random, the parties run a protocol to generate a random polynomial of degree $2t$.
+In other words $f(x)$ and $g(x)$ are uniformly random polynomials of degree $t$, but $h(x)$ as a multiplication of two random polynomials is not irreducible, therefore $h(x)$ is not uniformly random. A uniformly random polynomial is a polynomial with coefficients that are randomly sampled according to the uniform distribution, i.e. the coefficients are randomly sampled from a set where drawing each element is equally probable. To make sure the resulting polynomial stays of degree $t$ and is uniformly random, the parties run a protocol to generate a random polynomial of degree $2t$.
+
+The result of a multiplication of a uniformly random polynomials of degree $t$ with a uniformly random polynomial of degree less than or equal to $t$ is a polynomial of degree $2t$. Assuming the base field is $Z_q$, then there are $q^{2t+1}$ such polynomials, but we would only get $q^{d+1}$ polynomials. So the distribution is not uniform.
 
 This protocol works as follows. Each party $P_i$ randomly selects a private polynomial $q_i(x)$ with secret $q_i(0) = 0$ of degree $2t$ and distributes it's shares among the parties. Each party $P_i$ now has $n$ random shares $[q]_i^k$ (with $k: 1 \rightarrow n$). After each party adds all it's random shares they hold a secret, truly random polynomial $q(x)$ with a zero as free coefficient $q(0) = 0$.
 Each party $P_i$ now computes the multiplication of the two secret values $[a]$ and $[b]$ and instead of using $[c]$ encoded as $h(x)$ we can add the random polynomial to the result, thus randomizing the coefficients and making the polynomial uniformly random. This will not mess up the result as now $a \cdot b$  is $(f(0) \cdot g(0)) + q(0)$ and $q(0)$ equals zero. This step is also called the randomization step.
@@ -187,7 +200,7 @@ Often we want to know more about two secrets than just equal or different. We wa
 \subsection{Number representation}
 When a CNN gets computed on cleartext data almost all parameters of the CNN are floating-points, it is thus important that these numbers can be transformed to representations suitable for MPC.
 
-Floating-points can be implemented in MPC. But they usually come with a high complexity cost for addition aswell as multiplication and comparison tests. The advantage of floats over other number representations like scaled integers and fixed-point numbers is that the the maximal rounding error scales with the magnitude of the number. Unlike floats fixed-points have a rounding error of a fixed size. \cite{campmans2018optimizing} studied the use of fixed-point numbers as an alternative for floating-point numbers in MPC protocols. He states that with fixed-point numbers no comparison needs to be done during multiplication of two secrets. While the costly comparison is needed when multiplicating two secret floating-point numbers.
+Floating-points can be implemented in MPC. But they usually come with a high complexity cost for addition as well as multiplication and comparison tests. The advantage of floats over other number representations like scaled integers and fixed-point numbers is that the the maximal rounding error scales with the magnitude of the number. Unlike floats fixed-points have a rounding error of a fixed size. \cite{campmans2018optimizing} studied the use of fixed-point numbers as an alternative for floating-point numbers in MPC protocols. He states that with fixed-point numbers no comparison needs to be done during multiplication of two secrets. While the costly comparison is needed when multiplicating two secret floating-point numbers.
 
 A fixed point data type is essentialy an integer that is scaled by a chosen factor. Let's say our numbers in the MPC protocol never go out of the bounds $[-500,500]$ and we want a precision of 2 fractional digits. Then we can use the integers bounded by $[-50000,50000]$ to perform all arithmetic. The arithmetic operations will be the same as when we use integers. But we will actually be computing arithmetic operations on fixed-point numbers. This allows for an efficient approach to floating-point numbers while minimizing rounding errors. Of course we need to make sure that the operations don't overflow and that precision loss is small.
 
@@ -204,16 +217,15 @@ Overview of protocols:
 
 This set of protocols can be used to transform any basic CNN to a secure one.
 
-In figure \ref{fig:workflow} a high-level workflow of secure face recognition is shown. The MPC protocol works for three parties \footnote{This is the smallest amount of parties needed in order to do secure multiplication ($F_{mul}$).}, who each have their own computing instance connected to the MPC network and the client. The workflow commences by acquiring an image of the clients face, this can be done by taking a photograph with the front-facing camera of the clients smartphone. The client then performs secret sharing on the image \footnote{Secret sharing is performed for each pixel of the image.} and sends the shared secret to the participating parties. The parties receive their shares and jointly compute the output of the face recognition model on the given shared image of the face. The face recognition model can be public or secret. In the case of a secret model, the secret shares of the weights and biases need to be sent to the participating parties aswell. Note that this only has to be done once, during initialisation. After the computation is finished, the parties send their resulting secret shares to the client. The client interpolates the shares to find the secret values determining if her face matches or not.
+In figure \ref{fig:workflow} a high-level workflow of secure face recognition is shown. The MPC protocol works for three parties \footnote{This is the smallest amount of parties needed in order to do secure multiplication ($F_{mul}$).}, who each have their own computing instance connected to the MPC network and the client. The workflow commences by acquiring an image of the clients face, this can be done by taking a photograph with the front-facing camera of the clients smartphone. The client then performs secret sharing on the image \footnote{Secret sharing is performed for each pixel of the image.} and sends the shared secret to the participating parties. The parties receive their shares and jointly compute the output of the face recognition model on the given shared image of the face. The face recognition model can be public or secret. In the case of a secret model, the secret shares of the weights and biases need to be sent to the participating parties as well. Note that this only has to be done once, during initialisation. After the computation is finished, the parties send their resulting secret shares to the client. The client interpolates the shares to find the secret values determining if her face matches or not.
 
-
-This protocol ensures that the client is the only one having knowledge about the cleartext of the image and the output of the face recognition algortihm. This protocol also offers an obfuscation of the model's parameters, the parties and the client have no knowledge about the parameters if the owner of the model uses secret sharing to send the parameters to the parties.
-
-\begin{figure}
+\begin{figure}[H]
   \includegraphics[width=\linewidth]{fig/workflow.png}
   \caption{Workflow of secure face matching}
   \label{fig:workflow}
 \end{figure}
+
+This protocol ensures that the client is the only one having knowledge about the cleartext of the image and the output of the face recognition algorithm. This protocol also offers an obfuscation of the model's parameters, the parties and the client have no knowledge about the parameters if the owner of the model uses secret sharing to send the parameters to the parties.
 
 \section{Related work}
 \cite{erkin2009privacy} presented for the first time a privacy-preserving face recognition alogithm using MPC, this was before the rise of machine learning. Thus they were restricted to using eigenvalues of the faces described in \cite{turk1991face}. They show that their privacy-preserving face recognition algorithm is as reliable as the normal face recognition algorithm. Unfortunately, the computational cost for producing the eigenvalues of an image is way less than producing a result for a CNN.
@@ -228,7 +240,7 @@ This protocol ensures that the client is the only one having knowledge about the
 
 \cite{makri2019epic} proposed EPIC an efficient private immage classification system based on support vector machine (SVM) learning. They focus on efficiency by minimizing the load on the privacy-preserving part. Their experiments conclude that their is a tradeoff between efficiency and accuracy of the privacy-preserving image classification systems. They consider the deployment of a CNN with current MPC protocols in an active adversary MPC environment to be computationaly prohibitive. It should be noted that in our implementation, we assume the MPC environment to be made of passive adversaries.
 
-\cite{taigman2014deepface} presented DeepFace, a face recognition algortihm trained on millions of images of Facebook users. It achieves a stunning 97.35\% on the Labeled Faces in the Wild (LFW) dataset, which is the classic benchmark dataset for face recognition, closing the gap to human-level perfomance. The authors made use of a siamese neural network. But this alogrithm is already outdated. Deep learning based networks use more layers than a regular neural network, \cite{wang2018deep} give an overview of the recently published alogrithms, most of them use a deep learning based architecture. Some of the alogrithms achieve an acurracy of around 99.8\% on the LFW dataset. This surpasses the ability of face recognition by humans. These neural networks often have millions if not billions of parameters. This means that the computational complexity is very high and it is unlikely that we will find a way to efficiently make this type of neural networks secure. Instead we will focus on slightly lighter neural networks with less layers and parameters.
+\cite{taigman2014deepface} presented DeepFace, a face recognition algorithm trained on millions of images of Facebook users. It achieves a stunning 97.35\% on the Labeled Faces in the Wild (LFW) dataset, which is the classic benchmark dataset for face recognition, closing the gap to human-level perfomance. The authors made use of a siamese neural network. But this alogrithm is already outdated. Deep learning-based networks use more layers than a regular neural network, \cite{wang2018deep} give an overview of the recently published alogrithms, most of them use a deep learning-based architecture. Some of the alogrithms achieve an acurracy of around 99.8\% on the LFW dataset. This surpasses the ability of face recognition by humans. These neural networks often have millions if not billions of parameters. This means that the computational complexity is very high and it is unlikely that we will find a way to efficiently make this type of neural networks secure. Instead we will focus on slightly lighter neural networks with less layers and parameters.
 
 \section{Conclusion}
 It is theoretically possible to implement a privacy-preserving CNN that works just like a normal CNN on cleartext data. But in practice we expect some resistance based on the related work, the main problem is the complexity that arises when performing MPC protocols on high dimensional data like images. There is a tradeoff between precision and complexity. Our first steps shall be to implement a naive design of the MPC protocol for CNN's. Then we will try to improve the efficiency, by adding existing optimisation solutions, thus minimizing the time it takes to perform one face matching task. We will compare our results with other privacy-preserving techniques for CNN's.
