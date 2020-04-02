@@ -7,14 +7,15 @@
 \chapter{Implementation}
 In this chapter we will explain how we implemented MPC for face matching algorithms. We will do this by giving a high-level overview of the system and then diving deeper in more interesting parts. With this information and the code in the appendix, you should be able to reproduce our experiments. You can also checkout our Github repository\footnote{\url{github.com/Fluxmux/securefacematching}}.
 %TODO: Phrase this better
+
 \section{Specifications}
 There are two major subprojects. The first subproject (chapter \ref{Deep Learning}) is making sure we can generate the appropriate parameters for the face matching network. It is important that the model is accurate enough. The second subproject (chapter \ref{Secure Functions}) is about transforming the classic machine learning functions to secure ones. To add this security or privacy-preserving factor we use a MPC framework.
 
 \subsection{Deep Learning}
 \label{Deep Learning}
-A machine learning project usually includes on of the popular frameworks available to the public. Since we were already familiar with Pytorch we used this library as python package.
+A machine learning project usually includes on of the popular frameworks available to the public. Since we were already familiar with Pytorch we used this library as a python package.
 
-Pytorch \footnote{\url{pytorch.org}} provides us with a deep learning research platform that provides maximum flexibility and speed. It's fairly easy to use but that doesn't mean we can't design more complex models or features. Pytorch uses tensors, tensors are multi-dimensional matrix containing elements of a single data type. Designing a neural network with Pytorch is as simple as defining a class with the layers in the correct order. An example of a neural network written using pytorch can be seen in the following code~\ref{lst:pytorch_example}\\
+Pytorch \footnote{\url{pytorch.org}} provides us with a deep learning research platform that provides maximum flexibility and speed. It's fairly easy to use but that doesn't mean we can't design more complex models or features. Pytorch uses tensors, tensors are multi-dimensional matrix containing elements of a single data type. Designing a neural network with Pytorch is as simple as defining a class with the layers in the correct order. An example of a neural network written using pytorch can be seen in the following code (listing~\ref{lst:pytorch_example})\\
 
 \begin{lstlisting}[language=Python, caption={Pytorch neural network example}, label={lst:pytorch_example}, frame=single]
 class SiameseNetwork(nn.Module):
@@ -35,7 +36,42 @@ Making an accurate face matching neural network. Is a process that involves thre
 
 First of all the design or architecture of the network gets chosen. There exist a number of different topologies used in deep neural networks. But often choosing which one to take and how many layers to use, is the most difficult task. We will cover the architecture of the model in chapter \ref{Design}. Adding more layers is the same as adding more parameters. And a model with more parameters is more complex.
 
-The second step is called the traing of the neural network. Training is done using a part of the dataset that is specific for training and shouldn't be used for anything else. Training a neural network takes some time, but the process can be sped up by using graphics processing units (GPU). We were lucky enough to have a dedicated GPU server at our disposal. While training the network is an easy task, we should look out for overfitting or underfitting.
+The second step is called the traing of the neural network. Training is done using a part of the dataset that is specific for training and shouldn't be used for anything else.
+
+A typical workflow of the training step looks something like this: Two labeled faces are sent seperatly sent through the network. The euclidean distance (equation \ref{eq:euclideandistance}) for inputs $\vec{X_{1}}$ and $\vec{X_{2}}$ and the parameterized function $G_{W}$ calculates the distance between the outputs. This distance metric should be close to zero for faces belonging to the same person. But as large as possible for faces belonging to different person.
+
+\begin{equation} \label{eq:euclideandistance}
+  D_{W}(\vec{X_{1}},\vec{X_{2}})=\lVert G_{W}(\vec{X_{1}}) - G_{W}(\vec{X_{2}}) \rVert
+\end{equation}
+
+Then we use the loss function Yann LeCun first introduced in his paper \cite{hadsell2006dimensionality}; The general loss function $L$ is the sum of contrastive loss functions for a training pair in the set of training pairs of size $P$.
+
+Let $Y$ be the binary label assigned to this pair of faces, $Y=0$ if $\vec{X_{1}}$ and $\vec{X_{2}}$ are labeled as similar, and $Y=1$ if $\vec{X_{1}}$ and $\vec{X_{2}}$ are labeled as dissimilar.
+
+\begin{equation} \label{eq:contrastiveloss}
+  L(W,Y,\vec{X_{1}},\vec{X_{2}})=(1-Y)\frac{1}{2}(D_{W})^{2} + Y\frac{1}{2}(max^{2}(0, m - D_{W}))
+\end{equation}
+
+The contrastive loss function is definded in formula \ref{eq:contrastiveloss}, where $m > 0$ is the margin. The margin $m$ can be seen as a radius so that dissimilar pairs still contribute to the loss function if their distance is withing this radius. The goal of training is to minimize the loss. For similar pairs this means decreasing the distance $D_{W}$, for dissimilar pairs this means increasing the distance to be greater than the margin. We came to the conclusion that our loss reduces the most if we choose a margin of $m=2$.
+
+We also tried a different approach, instead of using this distance metric (which we would than have to statically threshold) we would like to have a probability value between $0$ and $1$. The output layer of the network consists out of two neurons (two classes), one neuron describes the similar faces, the other neuron describes the dissimilar faces. A probability of $0$ means that the faces belong to different persons and a probability of $1$ means that the faces belong to the same person. Binary Cross Entropy loss, or Logaritmic loss (equation \ref{eq:crossentropyloss}) is one of the loss functions that can be used to achieve this.
+
+\begin{equation} \label{eq:crossentropyloss}
+  L=-{(y\log(p) + (1 - y)\log(1 - p))}
+\end{equation}
+
+Let $y$ be the binary label assigned to this pair of faces, $p$ is the predicted probability. To visualize this loss function, have a look at figure \ref{fig:crossentropyloss}
+
+\begin{figure}[H]
+  \includegraphics[scale=0.6]{fig/cross_entropy.png}
+  \centering
+  \caption{Range of loss values for $y=1$}
+  \label{fig:crossentropyloss}
+\end{figure}
+
+There exist a great number of other functions. Some might be better suited for the face matching problem. But since we need to keep things simple in order to implement MPC. We opt for one of the two loss functions described above.
+
+Training a neural network takes some time, but the process can be sped up by using graphics processing units (GPU). We were lucky enough to have a dedicated GPU server at our disposal. While training the network is an easy task, we should look out for overfitting or underfitting.
 
 Overfitting a model happens when there are too much parameters for a model or when the training was performed for too long. It will perform poorly on the validation dataset (part of dataset used to detect bad trainig behaviour) while performing excellent on the training dataset. There are two ways of overcoming overfitting. One way is to make the training dataset larger. Having more samples to train on, generalizes the learning model better. The other way is to design the model with fewer parameters, making it less complex. We use learning curves to track the training process of our face matching algortihm. An example of a more or less correct learning curve can be found in figure \ref{fig:trainingcurve}.
 
