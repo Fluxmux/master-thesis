@@ -8,6 +8,8 @@
 \texttt{\textcolor{blue}{#1}}%
 }
 
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
 \chapter{Implementation}
 In this chapter we will explain how we implemented MPC for face matching algorithms. We will do this by giving a high-level overview of the system and then diving deeper in more interesting parts. With this information and the code in the appendix, you should be able to reproduce our experiments. You can also checkout our Github repository\footnote{\url{github.com/Fluxmux/securefacematching}}.
 %TODO: Phrase this better
@@ -38,7 +40,7 @@ class SiameseNetwork(nn.Module):
 
 Making an accurate face matching neural network. Is a process that involves three major steps.
 
-First of all the design or architecture of the network gets chosen. There exist a number of different topologies used in deep neural networks. But often choosing which one to take and how many layers to use, is the most difficult task. We will cover the architecture of the model in chapter \ref{Design}. Adding more layers is the same as adding more parameters. And a model with more parameters is more complex.
+First of all the design or architecture of the network gets chosen. There exist a number of different topologies used in deep neural networks. But often choosing which one to take and how many layers to use, is the most difficult task. We will cover the architecture of the model in chapter \ref{ConvolutionalNeuralNetworkArchitecture}. Adding more layers is the same as adding more parameters. And a model with more parameters is more complex.
 
 The second step is called the traing of the neural network. Training is done using a part of the dataset that is specific for training and shouldn't be used for anything else.
 
@@ -111,21 +113,274 @@ Secure functions or the privacy preserving equivalent of an ordinary function ca
   \label{fig:blackbox}
 \end{figure}
 
-Berry Schoenmakers is a cryptographer working on cryptographic protocols for electronic voting, electronic payments and secure multiparty computation. Since 2018 he has been working on a general MPC implementation for python, called MPyC. This pyhton package can be easily installed with pip: \codeword{pip install mpyc}. For more information on how to use this package have a look at the source code at \url{github.com/lschoe/mpyc}.
+Berry Schoenmakers is a cryptographer working on cryptographic protocols for electronic voting, electronic payments and secure multiparty computation. Since 2018 he has been working on a general MPC implementation for python, called MPyC. This pyhton package can be easily installed with pip: \codeword{pip install mpyc}. The mpyc package defines two new number representation types: SecFxp and SecInt. SecFxp are secure fixed-point numbers. SecInt are secure integers. For more information on how to use this package have a look at the source code at \url{github.com/lschoe/mpyc}.
 
-There are number of basic functions predefined, like \keyword{add}, \keyword{sub}, \keyword{mul} and \keyword{div}, respectively $+$, $-$, $\times$ and $\div$. As well as \keyword{eq} (equal to), \keyword{ge} (greater than or equal), \keyword{min} and \keyword{max}. The total set of available functions can be found in \keyword{mpyc.runtime.py}. But for our task the functions noted above are all we need.
+There are number of basic functions predefined, like \codeword{add}, \codeword{sub}, \codeword{mul} and \codeword{div}, respectively $+$, $-$, $\times$ and $\div$. As well as \codeword{eq} (equal to), \codeword{ge} (greater than or equal), \codeword{min} and \codeword{max}. The total set of available functions can be found in \codeword{mpyc.runtime.py}. But for our task the functions noted above are all we need.
 
-With this set of fundamental functions we can generate our own custom functions that serve our needs. We introduce three essential custom secure functions that can be found in \keyword{/mpc/device/mpyc/demo/custom_operations.py}.
+With this set of fundamental functions we can generate our own custom functions that serve our needs.
+
+\subsubsection{Custom Operations}
+
+We introduce three essential custom secure functions that can be found in \codeword{custom_operations.py}.
 
 \begin{itemize}
-  \item \keyword{convolution}.
-  \item \keyword{maxpooling}.
-  \item \keyword{relu}.
+  \item \codeword{convolution}
+  \item \codeword{maxpooling}
+  \item \codeword{relu}
 \end{itemize}
 
+\codeword{convolution} is a secure function that takes two arguments $X$ and $W$ as input as can be seen in listing~\ref{lst:convolution}. Let $W$ be the kernel and $X$ the image over which to do the convolution. $X$ can be of any shape $(m, n)$, $W$ needs to be a square matrix of size $s$. We then define $Y$ to be the output matrix of the convolution function. Because the convolution is padded, $Y$ is of the same size as $X$.
+
+\begin{lstlisting}[language=Python, caption={Secure convolution function}, label={lst:convolution}, frame=single, breaklines=true]
+def convolution(X, W):
+    m, n = dim(X)
+    s = len(W)
+    s2 = (s - 1) // 2
+    Y = [None] * m
+    for i in range(m):
+        Y[i] = [None] * n
+        for j in range(n):
+            t = 0
+            ix = i - s2
+            for di in range(s):
+                if 0 <= ix < m:
+                    jx = j - s2
+                    for dj in range(s):
+                        if 0 <= jx < n:
+                            t += X[ix][jx] * W[di][dj]
+                        jx += 1
+                ix += 1
+            Y[i][j] = t
+    return Y
+\end{lstlisting}
+
+Note that the number representation types that will be used in this secure convolution function, are not simple integers or floats. $X$, $W$ and $Y$ are matrices of SecInt's or SecFxp's.\\
+
+\codeword{maxpooling} is a secure function (listing~\ref{lst:maxpooling}). The function takes one argument as input, $X$ an image of size $(m,n)$. We define a specific type of maxpooling, the pooling window has a size of $2$ by $2$ and the stride is equal to $2$. The output $Y$ is a matrix of size $(\floor*{\frac{m}{2}}, \floor*{\frac{n}{2}})$.
+
+\begin{lstlisting}[language=Python, caption={Secure maxpooling function}, label={lst:maxpooling}, frame=single, breaklines=true]
+def maxpool(X):
+    m, n = dim(X)
+    Y = [None] * (m // 2)
+    for i in range(0, m - 1, 2):
+        Y[int(i/2)] = [None] * (n // 2)
+        for j in range(0, n - 1, 2):
+            Y[int(i/2)][int(j/2)] = mpc.max(X[i][j], X[i][j+1], X[i+1][j], X[i+1][j+1])
+    return np.array(Y)
+\end{lstlisting}
+
+\codeword{relu} is a secure function (listing~\ref{lst:relu}). The function takes one argument as input, $X$ the image of size $(m,n)$. This function doesn't change the shape of the input matrix, only the value of the elements of the matrix are changed, if they fulfill the condition.
+
+\begin{lstlisting}[language=Python, caption={Secure ReLU function}, label={lst:relu}, frame=single, breaklines=true]
+def relu(X):
+    return np.vectorize(lambda a: (a >= 0) * a)(X)
+\end{lstlisting}
+
+Note that writing \codeword{a >= 0} or \codeword{mpc.ge(a, 0)} has the same effect. The same can be said for \codeword{(a >= 0) * a} and \codeword{mpc.mul(a >=0, a)}. The MPC operators are wrapped for the basic python operators on SecInt's and SecFxp's.\\
+
+These three basic building blocks are essential for a convolutional neural network. But for the MPC protocol to function properly, we need to address some other problems. We will continue by giving a practical overview of the whole MPC protocol.\\
+
+\begin{figure}[H]
+  \includegraphics[scale=0.25]{fig/dockercontainer.png}
+  \centering
+  \caption{Three docker containers sharing the same infrastructure}
+  \label{fig:dockercontainer}
+\end{figure}
+
+Suppose we have one user (device) and three computing parties (server)\footnote{Note that for ease, we use a loopback interface (localhost)}. We use the terms device and server to differentiate between two groups. On one hand we have the users who request a secure face matching task to be done, these users belong to the device group. On the other hand we have the parties doing the MPC, they belong to the server group.
+
+The parties can be simulated by using three different Docker containers (figure \ref{fig:dockercontainer}), these containers share the same infrastructure (network). By setting the containers to different ports (5000, 5001, 5002 and 11365, 11366, 11367) on this network we can access, the containers from outside (device)\footnote{With outside we mean outside of the other containers, but the machine accessing the containers must still be on the loopback interface}. The Docker file (listing~\ref{lst:docker}) and environment file (listing~\ref{lst:env}) for  setting up the three parties.
+
+\begin{lstlisting}[caption={Docker files for servers}, label={lst:docker}, frame=single]
+FROM tsutomu7/scientific-python
+MAINTAINER Carlton Shepherd "carlton.shepherd@onespan.com"
+COPY . /app
+
+# Install requirements
+WORKDIR /app
+RUN pip install -r requirements.txt
+
+# Install MPyC from source after giving
+# default user (scientist) all ownership
+WORKDIR ./mpyc
+USER root
+RUN chown -R scientist .
+USER scientist
+RUN python setup.py install --user
+
+#EXPOSE 11365
+
+# Launch server
+WORKDIR ../
+CMD ["python -u", "./app.py"]
+\end{lstlisting}
+
+The \codeword{app.py} script runs a webserver using the python package flask and a database using the python package pymongo (MongoDB). The webserver will be used to communicate between the device and the server (to launch the MPC protocol, clear the database, ...) while the MongoDB will be used to store the secret shares for that particular server.
+
+\begin{lstlisting}[caption={Environment file for servers}, label={lst:env}, frame=single]
+N_PARTIES=3
+PARTY_0_HOST=localhost
+PARTY_0_PORT=5000
+PARTY_1_HOST=localhost
+PARTY_1_PORT=5001
+PARTY_2_HOST=localhost
+PARTY_2_PORT=5002
+\end{lstlisting}
+
+When all three parties (server) are up and running, the user (device) can start encrypting their input image containing their face using Shamir's secret sharing scheme (listing \ref{lst:ssss}). The user shares each pixel of the image in to three secret shares, one for each party. The user then sends their three sets of secret shares (encrypted image) to the parties, each party receives only one set of shares.
+
+\begin{lstlisting}[caption={Shamir secret sharing algorithm}, label={lst:ssss}, frame=single, breaklines=true]
+def random_split(s, t, m):
+    field = type(s[0])
+    p = field.modulus
+    order = field.order
+    T = type(p) # T is int or gf2x.Polynomial
+    n = len(s)
+    shares = [[None] * n for _ in range(m)]
+    for h in range(n):
+        c = [secrets.randbelow(order) for _ in range(t)]
+        # polynomial f(x) = s[h] + c[t-1] x + c[t-2] x^2 + ... + c[0] x^t
+        for i in range(m):
+            y = 0 if T is int else T(0)
+            for c_j in c:
+                y += c_j
+                y *= i + 1
+            shares[i][h] = (y + s[h].value) % p
+    return shares
+\end{lstlisting}
+
+The algorithm above splits each secret given by parameter s (list of secrets) into m random Shamir shares. The degree for the Shamir polynomials is t remember  $0 \leq t < n$. The algorithm returns a matrix of shares, one row per party.\\
+
+Finally the user can start the computation by, sending a the appropriate request to one of the parties (listing \ref{lst:devicelaunch}). We make use of the requests package, requests is a simple HTTP library for python it enables us to make requests and get responses over HTTP.
+
+\begin{lstlisting}[caption={Sending request for secure face matching task}, label={lst:devicelaunch}, frame=single, breaklines=true]
+# Define hosts and ports
+hosts = ['localhost', 'localhost', 'localhost']
+ports = [5000, 5001, 5002]
+
+# Shares secrets
+image = cv2.imeread("face.pgm")
+kernel = [[1,1,1],[0,0,0],[-1,-1,-1]]
+send_shares_mpc(image, ['Image'], 'test', hosts, ports, combined = True)
+send_shares_mpc(kernel, ['Filters'], 'model', hosts, ports, combined = True)
+
+# Start MPC
+url = f'http://{hosts[0]}:{ports[0]}/mpyc_launch?api=face_matching_server'
+response = requests.get(url)
+# Response contains output of the MPC
+\end{lstlisting}
+
+Note that the HTTP response we get from the GET request contains two variables; the status code and the text. The status code indicates wheter the HTTP request has been  succesfully completed, a valid and succesfull request has a response code of 200. The text of a response is the message that is transferred in the body of the HTTP response. We use the HTTP as means of communication between the device and the server. Note that for more secure implementations, HTTPS (Hypertext Transfer Protocol Secure) is preferred. Since traffic in HTTPS is encrypted using Transport Layer Security (TLS). Using HTTPS denies MITM attacks (man-in-the-middle), a type of attack where a passive attacker tries to eavesdrop certain packets of the traffic.\\
+
+The GET query of the request sent in listing \ref{lst:devicelaunch} executes the following code (listing \ref{lst:mpyclaunch}) on the first party or PARTY\_0 (localhost:5000).
+
+\begin{lstlisting}[caption={Launching MPC and returning formatted output}, label={lst:mpyclaunch}, frame=single, breaklines=true]
+is_running = False
+@app.route("/mpyc_launch", methods=["GET"])
+def mpyc_launch():
+
+    def get_api_name(api_name):
+        return api_name + '.py'
+
+    http_arg = request.args.get('api')
+    script_name = get_api_name(http_arg)
+    if script_name is None:
+        return "400"
+
+    os.chdir(main_wd)
+    test_path="./mpyc/demos"
+    os.chdir(test_path)
+    # Raise other parties
+    Party = os.getenv(f"Party")
+    # Only execute following code for PARTY_0
+    if Party == '0':
+        global is_running
+        if is_running:
+            return '200'
+        else:
+            is_running = True
+
+        for i in range(int(os.getenv('N_PARTIES')) - 1, 0, -1):
+            party_host = os.getenv(f'PARTY_{i}_HOST')
+            party_port = os.getenv(f'PARTY_{i}_PORT')
+            host_addr = f'http://{party_host}:{party_port}/mpyc_launch?api={http_arg}'
+            r = requests.get(host_addr)
+            time.sleep(2.50)
+
+        # Run MPC script (PARTY_0)
+        process = subprocess.Popen(['python', script_name, '-c', f'party{3}_0.ini'], stdout=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        is_running = False
+
+        # Output everything inside of the '$$$' tags
+        output_formatted = stdout.decode().split('$$$')[1]
+        output_formatted = output_formatted.split('$$$')[0]
+        output_formatted = output_formatted.strip()
+        output_formatted = output_formatted.replace('\n', '')
+        output_formatted = output_formatted.strip(',')
+        return output_formatted
+
+    else:
+        # Run MPC script (party_1 and party_2)
+        os.system(f'python {script_name} -c party{3}_{Party}.ini &')
+        return "200"
+\end{lstlisting}
+
+The value of the api argument from the GET request determines which MPC script gets excecuted. Then PARTY\_0 starts executing the same code snippet (mpyc\_launch) on the other two parties, by sending the appropriate requests. The first party then executes a new subprocess that runs a the MPC script. The result of the MPC script gets written to the STDOUT stream (standard output) which can be read by the parent process. The result gets parsed in the MPC script, by printing the result between two \$\$\$ tags (like this \$\$\$ result \$\$\$). The other two parties skip most of the code (because their environment variable 'Party' differs from 0) and go straight to executing the same MPC script. Notice that PARTY\_0 plays an important role in establishing that the MPC script runs on the other parties. This centralisation is a clear weakness of this implementation, because a corrupted PARTY\_0 could cause great harm to the correctness of the protocol. But for the sake of simplicity we opt for this more centralised implementation. An overview of this implementation with the different groups (device and server) can be seen in figure \ref{fig:implementationoverview}.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.75]{fig/implementationoverview.png}
+  \centering
+  \caption{Overview of MPC implementation over HTTP (3 parties)}
+  \label{fig:implementationoverview}
+\end{figure}
+
+Last but not least, we discuss the mpc script that needs to run on the three parties. This script does the actual MPC. Each party holds an identical copy of this script. The parties begin by opening connections with eachother (\codeword{mpc.start}). Remember: parties need to communicate with eachother in order to output a result or to do non-linear operations such as multiplication of two secure numbers. Then the parties load the unique secret shares for the image and the convolution kernels stored in their MongoDB databases. Since the secret shares are stored in lists in the database, the parties reshape them to the original shape. Then the parties securely compute an output for the input image and kernels on a series of sequential layers (convolution, maxpooling and relu) made out of the essential building blocks we introduced at the beginning of this chapter. Finally the parties output the result (\codeword{mpc.output}) print the result (printing in python has the same effect as writing to STDOUT) but they do this in a manner such that the stream is parsed. Note that all parties print the result, but only PARTY\_0's STDOUT will be looked at. This is yet another flaw of our implementation. Better would be to look at everybody's STDOUT, to check if anyone is cheating by printing something other than the true result. Finally the parties begin shutting down (mpc.shutdown), closing all open connections. The subprocess will exit, unpausing the parent process. Which will unparse the STDOUT and return the result as a response to the device.\\
+
+ A basic example of an mpc script that contains all of the points made earlier can be observed in listing \ref{lst:mpcscript}.
+
+\begin{lstlisting}[caption={Example of MPC script for a single CNN layer (conv,maxp and relu)}, label={lst:mpcscript}, frame=single, breaklines=true]
+import math
+import numpy as np
+from mpyc.runtime import mpc
+from load_database import load_data
+from custom_operations import convolution, relu, maxpool
+
+async def main():
+    await mpc.start()
+
+    images = load_data('Image', 'test')
+    kernels = load_data('Filters', 'model')
+    image = images[0]
+    kernel = kernels[0]
+
+    image = np.reshape(image, (int(math.sqrt(len(image))), int(math.sqrt(len(image)))))
+    kernel = np.reshape(kernel, (int(math.sqrt(len(kernel))), int(math.sqrt(len(kernel)))))
+
+    conv = convolution(image, kernel)
+    maxp = maxpool(conv)
+    result = relu(maxp)
+    result = list(np.asarray(result).flatten())
+
+    print("$$$\n")
+    print(await mpc.output(result))
+    print("$$$")
+
+if __name__ == '__main__':
+    mpc.run(main())
+\end{lstlisting}
+
+Obviously a CNN has way more layers than just this triplet (convolution, maxpooling and relu). But we will discuss the secure design of the CNN later on in chapter \ref{SecureCNN}.
 
 \section{Design}
 \label{Design}
+In this chapter we discuss how we built the neural network and why we chose for the network's architecture in specific. After explaining the neural network's architecture, we will have a look at how we translate this model working on plaintext pictures to a secure model using MPC.
+
+\subsection{Convolutional Neural Network Architecture}
+\label{ConvolutionalNeuralNetworkArchitecture}
+
+\subsection{Secure CNN}
+\label{SecureCNN}
 
 
 \section{Conclusion}
