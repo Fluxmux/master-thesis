@@ -4,6 +4,10 @@
 %                                                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\NewDocumentCommand{\codeword}{v}{%
+\texttt{\textcolor{blue}{#1}}%
+}
+
 \chapter{Implementation}
 In this chapter we will explain how we implemented MPC for face matching algorithms. We will do this by giving a high-level overview of the system and then diving deeper in more interesting parts. With this information and the code in the appendix, you should be able to reproduce our experiments. You can also checkout our Github repository\footnote{\url{github.com/Fluxmux/securefacematching}}.
 %TODO: Phrase this better
@@ -98,6 +102,27 @@ We used the Database of Faces\footnote{\url{cam-orl.co.uk/facedatabase.html}} to
 
 \subsection{Secure Functions}
 \label{Secure Functions}
+Secure functions or the privacy preserving equivalent of an ordinary function can be used to compute an encrypted output as a function of encrypted inputs (figure \ref{fig:blackbox}). The protocol used for defining these secure functions is the MPC protocol.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.8]{plots/blackbox.png}
+  \centering
+  \caption{Secure function as a black box}
+  \label{fig:blackbox}
+\end{figure}
+
+Berry Schoenmakers is a cryptographer working on cryptographic protocols for electronic voting, electronic payments and secure multiparty computation. Since 2018 he has been working on a general MPC implementation for python, called MPyC. This pyhton package can be easily installed with pip: \codeword{pip install mpyc}. For more information on how to use this package have a look at the source code at \url{github.com/lschoe/mpyc}.
+
+There are number of basic functions predefined, like \keyword{add}, \keyword{sub}, \keyword{mul} and \keyword{div}, respectively $+$, $-$, $\times$ and $\div$. As well as \keyword{eq} (equal to), \keyword{ge} (greater than or equal), \keyword{min} and \keyword{max}. The total set of available functions can be found in \keyword{mpyc.runtime.py}. But for our task the functions noted above are all we need.
+
+With this set of fundamental functions we can generate our own custom functions that serve our needs. We introduce three essential custom secure functions that can be found in \keyword{/mpc/device/mpyc/demo/custom_operations.py}.
+
+\begin{itemize}
+  \item \keyword{convolution}.
+  \item \keyword{maxpooling}.
+  \item \keyword{relu}.
+\end{itemize}
+
 
 \section{Design}
 \label{Design}
