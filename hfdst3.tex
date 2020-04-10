@@ -374,10 +374,92 @@ Obviously a CNN has way more layers than just this triplet (convolution, maxpool
 
 \section{Design}
 \label{Design}
-In this chapter we discuss how we built the neural network and why we chose for the network's architecture in specific. After explaining the neural network's architecture, we will have a look at how we translate this model working on plaintext pictures to a secure model using MPC.
+In this chapter we discuss how we designed the neural network and why we chose for the network's architecture in specific. After explaining the neural network's architecture, we will have a look at how we translate a model working on plaintext pictures, to a secure model using MPC.
 
 \subsection{Convolutional Neural Network Architecture}
 \label{ConvolutionalNeuralNetworkArchitecture}
+In the process of choosing the best architecture for a CNN, we found four suitable models. We will see how each of these models are designed and in what way they differ from the others. Finally, we select one of these models to make it secure using MPC, the selection depends on the following criteria; straightforwardness of the MPC implementation, size of the network (number of parameters) and the preferred output (distance vector or binary classification).\\
+
+\textbf{General (applies for all models):} The input dimensions of the different neural networks is the same (1 x 100 x 100). The output can differ depending on what loss function is used (cross entropy loss or contrastive loss), but the meaning is the same, wheter a face matches another face or not. And the only difference is how to differentiate between these two classes (match or no match), this means the arbitrary threshold must be chosen on a different basis. To choose a good threshold that reflects the accuracy of the model, we iterate the calculation of the precision and recall for each threhold value in a certain range. This gets us the following curve (figure \ref{fig:threshold}), out of which we can distract the best threshold.\\
+
+\begin{figure}[H]
+  \includegraphics[scale=0.6]{fig/threshold.png}
+  \centering
+  \caption{Curve for selecting the best threshold value}
+  \label{fig:threshold}
+\end{figure}
+
+\textbf{CNN with Contrastive Loss:} This model is the first model we designed. It is simple and basic yet powerful. The neural network design can be seen in figure \ref{fig:ccncl}.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.7]{fig/cnncl.png}
+  \centering
+  \caption{CNN with contrastive loss function}
+  \label{fig:ccncl}
+\end{figure}
+
+The convolution layers, including Max-pooling (2 x 2 with stride 2) and ReLU after every convolution, consist out of four layers:
+
+\begin{enumerate}
+  \item 4 convolutions (7 x 7).
+  \item 8 convolutions (5 x 5).
+  \item 16 convolutions (3 x 3).
+  \item 32 convolutions (3 x 3).
+\end{enumerate}
+
+Each of these layers have different tasks. The first layers have larger convolution filters, these convolutions detect high-level features like distance or rotation between ears, nose and/or eyes. While the latter, smaller convolution filters detect low-level features like lines or dots (jawline, eyes, mouth).
+
+After the final convolution layer we flatten the output layer to a one-dimensional tensor. This tensor then serves as input for a small fully-connected neural network (perceptron), this network can be seen as an extension of the CNN. We use this fully-connected neural network to add global spatial correlation (a CNN is good for recognizing structures in local and neighbouring pixels). Since it's important to also important that the algorithm detects two objects or features that belong to eachother even though they are seperated and are not local or neighbouring, think of two ears on a face for instance.\\
+
+The code for this neural network is printed in below (listing~\ref{lst:cnncl}). And notice how simple this neural network is, with only four convolutional layers it is able to make a face matching decision.
+
+\begin{lstlisting}[caption={Code for CNN with contrastive loss}, label={lst:cnncl}, frame=single, breaklines=true]
+class SiameseNetwork(nn.Module):
+    def __init__(self):
+        super(SiameseNetwork, self).__init__()
+
+        self.cnn1 = nn.Sequential(
+            nn.Conv2d(1, 4, kernel_size=7),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(4, 8, kernel_size=5),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(8, 16, kernel_size=3),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(16, 32, kernel_size=3),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
+            nn.ReLU(),
+        )
+
+        self.fc1 = nn.Sequential(nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 64))
+
+    def forward_once(self, x):
+        output = self.cnn1(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc1(output)
+        return output
+
+    def forward(self, input1, input2):
+        output1 = self.forward_once(input1)
+        output2 = self.forward_once(input2)
+        return output1, output2
+\end{lstlisting}
+
+\textbf{CNN with Cross Entropy Loss:}
+
+\subsubsection{Residual Neural Network}
+Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.5]{fig/residualblock.png}
+  \centering
+  \caption{Residual block (1-layer skipping)}
+  \label{fig:residualblock}
+\end{figure}
+
+In short, ResNet allows us to use way more layers than before. So we derived our own ResNet-like model from the pre-trained ResNet model of Pytorch available at \url{github.com/pytorch/vision/blob/master/torchvision/models/resnet.py}. We saw an incline in accuracy using ResNet, but with more layers, there are more parameters and the complexity rises.
 
 \subsection{Secure CNN}
 \label{SecureCNN}
