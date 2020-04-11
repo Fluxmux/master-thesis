@@ -335,7 +335,7 @@ The value of the api argument from the GET request determines which MPC script g
   \label{fig:implementationoverview}
 \end{figure}
 
-Last but not least, we discuss the mpc script that needs to run on the three parties. This script does the actual MPC. Each party holds an identical copy of this script. The parties begin by opening connections with eachother (\codeword{mpc.start}). Remember: parties need to communicate with eachother in order to output a result or to do non-linear operations such as multiplication of two secure numbers. Then the parties load the unique secret shares for the image and the convolution kernels stored in their MongoDB databases. Since the secret shares are stored in lists in the database, the parties reshape them to the original shape. Then the parties securely compute an output for the input image and kernels on a series of sequential layers (convolution, maxpooling and relu) made out of the essential building blocks we introduced at the beginning of this chapter. Finally the parties output the result (\codeword{mpc.output}) print the result (printing in python has the same effect as writing to STDOUT) but they do this in a manner such that the stream is parsed. Note that all parties print the result, but only PARTY\_0's STDOUT will be looked at. This is yet another flaw of our implementation. Better would be to look at everybody's STDOUT, to check if anyone is cheating by printing something other than the true result. Finally the parties begin shutting down (mpc.shutdown), closing all open connections. The subprocess will exit, unpausing the parent process. Which will unparse the STDOUT and return the result as a response to the device.\\
+Last but not least, we discuss the mpc script that needs to run on the three parties. This script does the actual MPC. Each party holds an identical copy of this script. The parties begin by opening connections with each other (\codeword{mpc.start}). Remember: parties need to communicate with each other in order to output a result or to do non-linear operations such as multiplication of two secure numbers. Then the parties load the unique secret shares for the image and the convolution kernels stored in their MongoDB databases. Since the secret shares are stored in lists in the database, the parties reshape them to the original shape. Then the parties securely compute an output for the input image and kernels on a series of sequential layers (convolution, maxpooling and relu) made out of the essential building blocks we introduced at the beginning of this chapter. Finally the parties output the result (\codeword{mpc.output}) print the result (printing in python has the same effect as writing to STDOUT) but they do this in a manner such that the stream is parsed. Note that all parties print the result, but only PARTY\_0's STDOUT will be looked at. This is yet another flaw of our implementation. Better would be to look at everybody's STDOUT, to check if anyone is cheating by printing something other than the true result. Finally the parties begin shutting down (mpc.shutdown), closing all open connections. The subprocess will exit, unpausing the parent process. Which will unparse the STDOUT and return the result as a response to the device.\\
 
  A basic example of an mpc script that contains all of the points made earlier can be observed in listing \ref{lst:mpcscript}.
 
@@ -394,7 +394,7 @@ In the process of choosing the best architecture for a CNN, we found four suitab
 \begin{figure}[H]
   \includegraphics[scale=0.7]{fig/cnncl.png}
   \centering
-  \caption{CNN with contrastive loss function}
+  \caption{CNN with Contrastive Loss function}
   \label{fig:ccncl}
 \end{figure}
 
@@ -409,11 +409,13 @@ The convolution layers, including Max-pooling (2 x 2 with stride 2) and ReLU aft
 
 Each of these layers have different tasks. The first layers have larger convolution filters, these convolutions detect high-level features like distance or rotation between ears, nose and/or eyes. While the latter, smaller convolution filters detect low-level features like lines or dots (jawline, eyes, mouth).
 
-After the final convolution layer we flatten the output layer to a one-dimensional tensor. This tensor then serves as input for a small fully-connected neural network (perceptron), this network can be seen as an extension of the CNN. We use this fully-connected neural network to add global spatial correlation (a CNN is good for recognizing structures in local and neighbouring pixels). Since it's important to also important that the algorithm detects two objects or features that belong to eachother even though they are seperated and are not local or neighbouring, think of two ears on a face for instance.\\
+After the final convolution layer we flatten the output layer to a one-dimensional tensor. This tensor then serves as input for a small fully-connected neural network (perceptron), this network can be seen as an extension of the CNN. We use this fully-connected neural network to add global spatial correlation (a CNN is good for recognizing structures in local and neighbouring pixels). Since it's important to also important that the algorithm detects two objects or features that belong to each other even though they are seperated and are not local or neighbouring, think of two ears on a face for instance.\\
 
-The code for this neural network is printed in below (listing~\ref{lst:cnncl}). And notice how simple this neural network is, with only four convolutional layers it is able to make a face matching decision.
+The total number of learnable parameters (weights and biases) in this neural network is 154.592, the model doesn't show any sign of overfitting nor underfitting up to 500 epochs.\\
 
-\begin{lstlisting}[caption={Code for CNN with contrastive loss}, label={lst:cnncl}, frame=single, breaklines=true]
+The code for this neural network is printed in below (listing~\ref{lst:cnncl}). Notice how simple this neural network is. With only four convolutional layers, it is able to make a face matching decision.
+
+\begin{lstlisting}[caption={Code for CNN with Contrastive Loss}, label={lst:cnncl}, frame=single, breaklines=true]
 class SiameseNetwork(nn.Module):
     def __init__(self):
         super(SiameseNetwork, self).__init__()
@@ -447,10 +449,74 @@ class SiameseNetwork(nn.Module):
         return output1, output2
 \end{lstlisting}
 
-\textbf{CNN with Cross Entropy Loss:}
+\textbf{CNN with Cross Entropy Loss:} The following model (figure \ref{fig:cnncel}) is similar to the first one we described earlier. The key differences of this model, is that the siamese neural network stops after the last layer. The two output layers get flattened to two single one-dimensional tensors. These tensors then get concatenated. The concatenated tensor now gets sent trough a single fully-connected neural network (perceptron).\\
+
+\begin{figure}[H]
+  \includegraphics[scale=0.7]{fig/cnncel.png}
+  \centering
+  \caption{CNN with Cross Entropy Loss function}
+  \label{fig:cnncel}
+\end{figure}
+
+ Note that in the first model (CNN with Contrastive Loss) there is no fusion of the siamese neural network. And the only time the two inputs depend on each other, is when we calculate the euclidean distance between the two output tensors. In fact, this type of model is not really a pure siamese neural network anymore. We guess that the perceptron, placed after the convolution layers, performs some sort of comparison on the two output tensors and we hope this comparison will be better than the standard euclidean distance.\\
+
+ Finally, the cross entropy loss is calculated on the last layer of the model. Since face matching is a binary task (matching or not matching), the last layer contains a single neuron (class). The cross entropy of that neuron returns the chance for that class to be true. The pleasant advantage of cross entropy is that we don't have to set up an arbitrary threshold value, the threshold is simply already decided, for instance if $p \in [0,1]$ than the threshold is equal to $p = 0.5$.\\
+
+ The convolution layers consist of the same number of convolutions, as the first model:
+
+ \begin{enumerate}
+   \item 4 convolutions (7 x 7).
+   \item 8 convolutions (5 x 5).
+   \item 16 convolutions (3 x 3).
+   \item 32 convolutions (3 x 3).
+ \end{enumerate}
+
+ The code for the model is listed below (listing~\ref{lst:cnncel})
+
+ \begin{lstlisting}[caption={Code for CNN with Cross Entropy Loss}, label={lst:cnncel}, frame=single, breaklines=true]
+ class SiameseNetworkConcat(nn.Module):
+    def __init__(self):
+        super(SiameseNetwork, self).__init__()
+
+        self.cnn1 = nn.Sequential(
+            nn.Conv2d(1, 4, kernel_size=7),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(4, 8, kernel_size=5),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(8, 16, kernel_size=3),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU(),
+            nn.Conv2d(16, 32, kernel_size=3),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU(),
+        )
+
+        self.fc1 = nn.Sequential(
+            nn.Linear(1600, 100), nn.ReLU(inplace=True), nn.Linear(100, 10),
+        )
+
+        self.fc2 = nn.Sequential(
+            nn.Linear(20, 20), nn.ReLU(inplace=True), nn.Linear(20, 1),
+        )
+
+    def forward_once(self, x):
+        output = self.cnn1(x)
+        output = output.view(output.size()[0], -1)
+        output = self.fc1(output)
+        return output
+
+    def forward(self, input1, input2):
+        output1 = F.relu(self.forward_once(input1))
+        output2 = F.relu(self.forward_once(input2))
+        output = torch.cat((output1, output2), dim=1)
+        output = self.fc2(output)
+        return output
+ \end{lstlisting}
 
 \subsubsection{Residual Neural Network}
-Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
+The two other models make use of a special type of deep learning, known as deep residual learning, introduced in 2015 by \cite{he2016deep}. A Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
 
 \begin{figure}[H]
   \includegraphics[scale=0.5]{fig/residualblock.png}
@@ -460,6 +526,11 @@ Residual Neural Network (ResNet) is a special type of neural network that utiliz
 \end{figure}
 
 In short, ResNet allows us to use way more layers than before. So we derived our own ResNet-like model from the pre-trained ResNet model of Pytorch available at \url{github.com/pytorch/vision/blob/master/torchvision/models/resnet.py}. We saw an incline in accuracy using ResNet, but with more layers, there are more parameters and the complexity rises.
+
+\textbf{ResNet with Contrastive Loss:}
+
+\textbf{ResNet with Cross Entropy Loss:}
+
 
 \subsection{Secure CNN}
 \label{SecureCNN}
