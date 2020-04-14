@@ -378,7 +378,7 @@ In this chapter we discuss how we designed the neural network and why we chose f
 
 \subsection{Convolutional Neural Network Architecture}
 \label{ConvolutionalNeuralNetworkArchitecture}
-In the process of choosing the best architecture for a CNN, we found three suitable models. We will see how each of these models are designed and in what way they differ from the others. Finally, we select one of these models to make it secure using MPC, the selection depends on the following criteria; straightforwardness of the MPC implementation, size of the network (number of parameters) and the preferred output (distance vector or binary classification).\\
+In the process of choosing the best architecture for a CNN, we found four suitable models. We will see how each of these models are designed and in what way they differ from the others. Finally, we select one of these models to make it secure using MPC, the selection depends on the following criteria; straightforwardness of the MPC implementation, size of the network (number of parameters), accuracy of the model and the preferred output (distance vector or binary classification).\\
 
 \textbf{General (applies for all models):} The input dimensions of the different neural networks is the same (1 x 100 x 100). The output can differ depending on what loss function is used (cross entropy loss or contrastive loss), but the meaning is the same, wheter a face matches another face or not. And the only difference is how to differentiate between these two classes (match or no match), this means the arbitrary threshold must be chosen on a different basis. To choose a good threshold that reflects the accuracy of the model, we iterate the calculation of the precision and recall for each threhold value in a certain range. This gets us the following curve (figure \ref{fig:threshold}), out of which we can distract the best threshold.\\
 
@@ -515,8 +515,7 @@ class SiameseNetwork(nn.Module):
         return output
  \end{lstlisting}
 
-\subsubsection{Residual Neural Network}
-The last model make use of a special type of deep learning, known as deep residual learning, introduced in 2015 by \cite{he2016deep}. A Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
+\textbf{Residual Neural Network:} The last model make use of a special type of deep learning, known as deep residual learning, introduced in 2015 by \cite{he2016deep}. A Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
 
 \begin{figure}[H]
   \includegraphics[scale=0.5]{fig/residualblock.png}
@@ -555,7 +554,34 @@ class BasicBlock(nn.Module):
         return out
 \end{lstlisting}
 
-Notice that the \codeword{self.shortcut} function is simply the identity function.
+Notice that the \codeword{self.shortcut} function is simply the identity function.\\
+
+As we said before choosing a neural network depends on a number of factors, we will now rank each of the neural networks described above for each determining factor.\\
+
+Starting with the straightforwardness of the MPC implementation, in other words, how easy will it be to translate the code written with Pytorch to a MPC algorithm using no libraries for neural networks (since Pytorch doesn't support secure datatypes). It's obvious that a ResNet architecture requires more attention to detail and is more complex to implement. The other two neural networks require less attention to detail, thus are more easy to implement.\\
+
+Next, we compare size of the neural network. The neural network's size or it's number of parameters is an equally important factor. Since MPC protocols are way slower than classic computations. We would like our neural network to do fast computations. Fast computations corresponds to less computations, and less computations corresponds to less (or smaller) convolutions or fully-connected layers. Thus we would like our network to have a small number of layers, but still enough to be able to differentiate between faces. Since ResNet only adds extra layers, this model is again not preffered. The other two models have about the same number of parameters, and only the fully-connected layers have a different number of weights and biases.\\
+
+Ranking the neural networks on accuracy (the ability to match faces) was done by testing the four different networks, the results can be seen in table \ref{designaccuracy}. We find that when we are using the Contrastive Loss function, the classic CNN as well as the ResNet model is giving us better results than with the Cross Entropy loss function. Overall the ResNet model has a slightly better accuracy than the classic CNN.
+
+\begin{table}[]
+\begin{tabular}{llc}
+\hline
+\multicolumn{1}{|l|}{Model} & \multicolumn{1}{l|}{Loss} & \multicolumn{1}{l|}{Accuracy} \\ \hline
+Classic CNN                 & Contrastive Loss          & 89.20\%                       \\
+Classic CNN                 & Cross Entropy Loss        & 81.94\%                       \\
+ResNet (8 layers)           & Contrastive Loss          & 91.06\%                       \\
+ResNet (8 layers)           & Cross Entropy Loss        & 84.13\%
+\end{tabular}
+\caption{Accuracy of the different models}
+\label{table:designaccuracy}
+\end{table}
+
+Last but not least, what output do we prefer? The models with Contrastive loss have an output in the form of a score, the distance between two output vectors gets calculated. While the models with Cross Entropy loss simply output a chance, not having to worry about choosing a certain threshold. During the testing of the networks we argued that determining the threshold is not too hard, in fact the threshold can be easily chosen by drawing out a graph of the accuracy of the network and the different thresholds as in figure \ref{fig:ccncl}.\\
+
+Taking every factor in to consideration, we concluded that a classic CNN with Contrastive Loss offers a high enough accuracy and low complexity, while still being easy to implement in MPC.\\
+
+In the following part of this chapter we will discuss specifically what parts of the classic CNN we will encrypt.
 
 \subsection{Secure CNN}
 \label{SecureCNN}
