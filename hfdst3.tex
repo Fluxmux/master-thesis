@@ -515,7 +515,7 @@ class SiameseNetwork(nn.Module):
         return output
  \end{lstlisting}
 
-\textbf{Residual Neural Network:} The last model make use of a special type of deep learning, known as deep residual learning, introduced in 2015 by \cite{he2016deep}. A Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
+\textbf{Residual Neural Network:} The last model makes use of a special type of deep learning, known as deep residual learning, introduced in 2015 by \cite{he2016deep}. A Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
 
 \begin{figure}[H]
   \includegraphics[scale=0.5]{fig/residualblock.png}
@@ -564,14 +564,18 @@ Next, we compare size of the neural network. The neural network's size or it's n
 
 Ranking the neural networks on accuracy (the ability to match faces) was done by testing the four different networks, the results can be seen in table \ref{designaccuracy}. We find that when we are using the Contrastive Loss function, the classic CNN as well as the ResNet model is giving us better results than with the Cross Entropy loss function. Overall the ResNet model has a slightly better accuracy than the classic CNN.
 
-\begin{table}[]
-\begin{tabular}{llc}
-\hline
-\multicolumn{1}{|l|}{Model} & \multicolumn{1}{l|}{Loss} & \multicolumn{1}{l|}{Accuracy} \\ \hline
-Classic CNN                 & Contrastive Loss          & 89.20\%                       \\
-Classic CNN                 & Cross Entropy Loss        & 81.94\%                       \\
-ResNet (8 layers)           & Contrastive Loss          & 91.06\%                       \\
-ResNet (8 layers)           & Cross Entropy Loss        & 84.13\%
+
+\begin{table}[H]
+\centering
+\begin{tabular}{||c c c||}
+ \hline
+ Model & Loss & Accuracy \\ [0.5ex]
+ \hline\hline
+ Classic CNN  & Contrastive Loss & 89.20\% \\
+ Classic CNN  & Cross Entropy Loss & 81.94\% \\
+ ResNet (8 layers)  & Contrastive & 91.06\% \\
+ ResNet (8 layers)  & Cross Entropy Loss & 84.13\% \\
+ \hline
 \end{tabular}
 \caption{Accuracy of the different models}
 \label{table:designaccuracy}
@@ -581,7 +585,45 @@ Last but not least, what output do we prefer? The models with Contrastive loss h
 
 Taking every factor in to consideration, we concluded that a classic CNN with Contrastive Loss offers a high enough accuracy and low complexity, while still being easy to implement in MPC.\\
 
-In the following part of this chapter we will discuss specifically what parts of the classic CNN we will encrypt.
+In the following part of this chapter we will discuss specifically what parts of the classic CNN we will encrypt. We ask ourselves the question: After how many convolution layers, ReLU layers and maxpooling layers will the output be unrecognizable?\\
+
+ Suppose that the activations after the first $n$ layers can not be traced back to the face present on the input image, then we don't need to encrypt the whole CNN but only the first $n$ layers. We could split up the neural network in two parts; a part that is encrypted and uses MPC to do certain operations and a part that is unencrypted. Of course the encrypted part must be placed before the unencrypted part. Otherwise the face would not be encrypted.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.2]{fig/activations/7.png}
+  \centering
+  \caption{All Activation maps for an image}
+  \label{fig:activations}
+\end{figure}
+
+An activation map or feature map is the hidden output activations for a given convolution filter. They are called activation/feature maps because you can clearly see features or certain areas in the output that are more important than others (high activations). Activation maps give an insight to what features the CNN extracts from the input. In figure \ref{activations} an overview of all the activation maps for a certain image can be seen. The first image is the input. The four pictures below that are activation maps of the first layer. The eight pictures below those are the activation maps from the second layer. And the last eight pictures are the activation maps from the last layer.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.4]{fig/activations/7_1.png}
+  \centering
+  \caption{Activation maps after the first layer}
+  \label{fig:activation_1}
+\end{figure}
+
+As you can see in figure \ref{fig:activation_1} the activation maps after the first layer are not obfuscated enough and can be recognized fairly easily by machines or humans. Thus only encrypting this part of the CNN would not be sufficient for a privacy preserving face matching algorithm. Notice how the resolution of the image became twice as small (this effect is caused by maxpooling) and is thereby much more difficult to recognize. Another perturbation that's taking place is the ReLU activation function, discarding all negative values from the output. Lastly the convolutions can cause small or great perturbations to the image depending on the convolution filter.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.4]{fig/activations/7_2.png}
+  \centering
+  \caption{Activation maps after the second layer}
+  \label{fig:activation_2}
+\end{figure}
+
+The activation maps after the second layer (figure \ref{fig:activation_2}) are very pixelated. But since we can still recognize some major facial features, like the hair and the shape of the face. So this part of the neural network should still be encrypted.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.4]{fig/activations/7_3.png}
+  \centering
+  \caption{Activation maps after the third layer}
+  \label{fig:activation_3}
+\end{figure}
+
+Finally, we observe that it is impossible to recognize a face in one of the activation maps after the third layer (figure \ref{fig:activation_3}). The activation map is so pixelated that we can not recognize anything in it. Therefore we could make the third layer and everything that comes after it part of the unencrypted neural network. So that only the first two layers of the CNN needs to be encrypted using MPC. Of course for additional security one may choose to encrypt more than only the first two layers or even the whole neural network. But keep in mind that opting for more security by encrypting more layers, comes with an additional cost in complexity. We call this the security-complexity tradeoff.
 
 \subsection{Secure CNN}
 \label{SecureCNN}
