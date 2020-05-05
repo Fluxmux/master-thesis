@@ -91,7 +91,7 @@ Underfitting happens when a machine learning algorithm cannot capture the underl
 
 As you can see by now, the architecture of a model is extremely important for it to function as wished.
 
-The third step also called the hyperparameter tuning or hyperparameter optimisation step, is what makes a good machine learning model even better. This process is not at all logic, experience and intuition can facilitate this. Hyperparameters are all the parameters whose values are set before the learning process begins. There are different methods for optimizing hyperparameters, since we wanted to learn the model and how it behaves relating to small changes in the values of the hyperparameters we went for Manual Random Search. Note that this took us some time because this involves multiple training steps. But since we had a GPU server at our disposal we could parallelize this task. In our case this step improved our accuracy by about 5\%.
+The third step also called the hyperparameter tuning or hyperparameter optimization step, is what makes a good machine learning model even better. This process is not at all logic, experience and intuition can facilitate this. Hyperparameters are all the parameters whose values are set before the learning process begins. There are different methods for optimizing hyperparameters, since we wanted to learn the model and how it behaves relating to small changes in the values of the hyperparameters we went for Manual Random Search. Note that this took us some time because this involves multiple training steps. But since we had a GPU server at our disposal we could parallelize this task. In our case this step improved our accuracy by about 5\%.
 
 We used the Database of Faces\footnote{\url{cam-orl.co.uk/facedatabase.html}} to train and test our face matching algortihm. The dataset contains a set of 10 images of frontal faces with different expressions per person and a total of 40 persons. The pictures are in pgm format which is extremely easy to interact with. They have a dimension of 1 x 92 x 112. An example of a set of images from the dataset can be seen in figure \ref{fig:databaseoffaces}. We divided the dataset in to 3 parts: 75\% training, 12.5\% testing and another 12.5\% for validation.
 
@@ -585,6 +585,8 @@ Last but not least, what output do we prefer? The models with Contrastive loss h
 
 Taking every factor in to consideration, we concluded that a classic CNN with Contrastive Loss offers a high enough accuracy and low complexity, while still being easy to implement in MPC.\\
 
+\subsection{Secure CNN}
+\label{SecureCNN}
 In the following part of this chapter we will discuss specifically what parts of the classic CNN we will encrypt. We ask ourselves the question: After how many convolution layers, ReLU layers and maxpooling layers will the output be unrecognizable?\\
 
  Suppose that the activations after the first $n$ layers can not be traced back to the face present on the input image, then we don't need to encrypt the whole CNN but only the first $n$ layers. We could split up the neural network in two parts; a part that is encrypted and uses MPC to do certain operations and a part that is unencrypted. Of course the encrypted part must be placed before the unencrypted part. Otherwise the face would not be encrypted.
@@ -623,10 +625,28 @@ The activation maps after the second layer (figure \ref{fig:activation_2}) are v
   \label{fig:activation_3}
 \end{figure}
 
-Finally, we observe that it is impossible to recognize a face in one of the activation maps after the third layer (figure \ref{fig:activation_3}). The activation map is so pixelated that we can not recognize anything in it. Therefore we could make the third layer and everything that comes after it part of the unencrypted neural network. So that only the first two layers of the CNN needs to be encrypted using MPC. Of course for additional security one may choose to encrypt more than only the first two layers or even the whole neural network. But keep in mind that opting for more security by encrypting more layers, comes with an additional cost in complexity. We call this the security-complexity tradeoff.
+Finally, we observe that it is impossible to recognize a face in one of the activation maps after the third layer (figure \ref{fig:activation_3}). The activation map is so pixelated that we can not recognize anything in it. Therefore we could make the third layer and everything that comes after it part of the unencrypted neural network. So that only the first two layers of the CNN needs to be encrypted using MPC. Of course for additional security one may choose to encrypt more than only the first two layers or even the whole neural network. But keep in mind that opting for more security by encrypting more layers, comes with an additional cost in complexity. We call this the security-complexity tradeoff.\\
 
-\subsection{Secure CNN}
-\label{SecureCNN}
+The attentive reader may have noticed that certain of these activation maps are entirely black or predominantly black, if not have a look at figure \ref{fig:pruning_before}, meaning they don't contain any information or are useless. We realized that this phenomenon was occuring on the same activation map for every single image which inferred through the CNN. The convolution filter's weights were close to zero or negative, this meant that any input to those specific convolutions would have an output close to zero or negative. In fact this is not really a problem but after the ReLU activation layer all of the values of the activation map would be equal to zero. Rendering the activation map and the convolution as a whole obsolete. To take an advantage of this we used some form of pruning.
 
+\begin{figure}[H]
+  \includegraphics[scale=0.4]{fig/pruning_before.png}
+  \centering
+  \caption{First layer without pruning}
+  \label{fig:pruning_before}
+\end{figure}
+
+Pruning is a technique in machine learning that enables neural networks to be more efficient. It's an optimization technique that cuts out any unnecessary weights or biases. The result is a compressed, smaller version of the neural network than before, making it faster and less complex. There exists different processes and pipelines for pruning, and often neural networks are given too much parameters on purpose to apply pruning later on.
+
+In our case we can safely remove any of the convolutions causing the activation map to turn out black. And without losing too much accuracy we can also remove any convolution filter that doesn't provide enough information and is deemed insufficient. The following figure \ref{fig:pruning_after} displays how the first layer only outputs two activation maps after pruning, instead of the four activation maps that were produced in the original CNN.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.4]{fig/pruning_after.png}
+  \centering
+  \caption{First layer after pruning}
+  \label{fig:pruning_after}
+\end{figure}
+
+Eight out of the twenty convolution filters are infected with this defect, thus can be ignored or even removed from the CNN. This is great news, since this means we are able to optimize the convolutional part of the CNN with a speedup of around 40\%.
 
 \section{Conclusion}

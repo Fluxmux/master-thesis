@@ -90,10 +90,10 @@
 \def\@surnameB{Achternaam}
 \def\@opleiding{naam van de opleiding}
 \def\@afdeling{afstudeerrichting}
-\def\@promotorAname{} 
+\def\@promotorAname{}
 \def\@promotorBname{}
 \def\@promotorCname{}
-\def\@promotorAtype{} 
+\def\@promotorAtype{}
 \def\@promotorBtype{}
 \def\@promotorCtype{}
 \def\@academicyear{}
@@ -141,13 +141,13 @@
 \def\titlep{%
 	\thispagestyle{empty}
 	\setlength{\unitlength}{1cm}
-	
-	
+
+
 	% MFA: make margin comply with Word
 %	\geometry{right=10mm}
-	
+
 	%% implement all front covers of all campusses
-		
+
 	\newcommand{\printFrontCover}[1]
 	{
 		\ifthenelse{\equal{\@campus}{denayer}}{
@@ -199,7 +199,7 @@
 			\begin{picture}(0,0)(0,26)
 			\hspace{-10em}\includegraphics[width=\paperwidth]{private/cover_fiiw_bruges_eng.pdf}
 			\end{picture}
-		}{}		
+		}{}
 	}
 
 	\printFrontCover{\@campus}
@@ -210,11 +210,11 @@
 			\begingroup
 				\fontsize{14pt}{8pt}\selectfont EMBARGO: \\
 				\vspace{0.2em}
-			\endgroup	
+			\endgroup
 			\begingroup
-				\fontsize{10pt}{7pt}\selectfont 
+				\fontsize{10pt}{7pt}\selectfont
 				Deze masterproefscriptie staat onder embargo tot \@embargo \\
-			\endgroup	
+			\endgroup
 		\fi
 	\end{flushright}
 	\vskip1in
@@ -250,7 +250,7 @@
 					\item[\@promotorBtype:\hfill] \@promotorBname
 				\fi
  				\ifx \@promotorCname \@empty
- 				\else 
+ 				\else
  					\item[\@promotorCtype \hfill] \hspace{2pt} \@promotorCname
  				\fi
 			\end{list}
@@ -274,7 +274,7 @@
 	\null
 	\vfill
 	\copyright Copyright KU Leuven \\\\
-	\printCopyRightInfo.\\\\	
+	\printCopyRightInfo.\\\\
 	Voorafgaande schriftelijke toestemming van de promotor(en) is eveneens vereist voor het aanwenden van de in deze masterproef beschreven (originele) methoden, producten, schakelingen en programma's voor industrieel of commercieel nut en voor de inzending van deze publicatie ter deelname aan wetenschappelijke prijzen of wedstrijden.
 	\cleardoublepage
 }
@@ -311,7 +311,7 @@
 	}{}
 	\ifthenelse{\equal{\@campus}{brugeseng}}{
 		Zonder voorafgaande schriftelijke toestemming van zowel de promotor(en) als de auteur(s) is overnemen, kopi\"eren, gebruiken of realiseren van deze uitgave of gedeelten ervan verboden. Voor aanvragen i.v.m.~het overnemen en/of gebruik en/of realisatie van gedeelten uit deze publicatie, kan u zich richten tot KU Leuven Campus Brugge, Spoorwegstraat 12, B-8000 Brugge, +32 50 66 48 00 of via e-mail iiw.brugge@kuleuven.be.
-	}{}		
+	}{}
 }
 
 
@@ -331,23 +331,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\preface{
 	\pagenumbering{roman}
-	\titlep        
+	\titlep
 
-	\ifacknowledgementspage 
-		\chapter*{Voorwoord} \@acknowledgementsfile
-		\addcontentsline{toc}{chapter}{Voorwoord}
+	\ifacknowledgementspage
+		\chapter*{Acknowledgements} \@acknowledgementsfile
+		\addcontentsline{toc}{chapter}{Acknowledgements}
 	\fi
-	
+
 	\ifsummarypage
-		\chapter*{Samenvatting} \@summaryfile
-		\addcontentsline{toc}{chapter}{Samenvatting}
+		\chapter*{Nederlandstalige Samenvatting} \@summaryfile
+		\addcontentsline{toc}{chapter}{Nederlandstalige Samenvatting}
 	\fi
 
-	\ifabstractpage 
+	\ifabstractpage
 		\chapter*{Abstract} \@abstractfile
 		\addcontentsline{toc}{chapter}{Abstract}
 	\fi
-	
+
 
 	\tableofcontents
 	\addcontentsline{toc}{chapter}{Inhoud}
@@ -356,7 +356,7 @@
 		\listoffigures
 		\addcontentsline{toc}{chapter}{Figurenlijst}
 	\fi
-	
+
 	\iflistoftablespage
 		\listoftables
 		\addcontentsline{toc}{chapter}{Tabellenlijst}
@@ -369,7 +369,7 @@
 	\iflistofabbrevspage
 		\@listofabbrevsfile
 	\fi
-       
+
 	\cleardoublepage
 	\pagenumbering{arabic}
 }
@@ -379,7 +379,7 @@
 \makeatother
 
 % MFA: Zet regelasfstand cfr faculteit:
-\renewcommand{\baselinestretch}{1.15} 
+\renewcommand{\baselinestretch}{1.15}
 
 % MFA: Zet correcte nummeringsdiepte
 \setcounter{secnumdepth}{3}
@@ -392,5 +392,3 @@
 	singlelinecheck=false,%%%%%%% a single line is centered by default
 	labelsep=space,%%%%%%
 	skip = \medskipamount}
-
-
