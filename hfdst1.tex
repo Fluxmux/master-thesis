@@ -15,7 +15,7 @@ Secure Multiparty Computation and Machine Learning aren't new concepts, in fact 
 
 Because of these concerns researchers are looking for technologies to enhance the privacy of the user during the processing of it's data on a server.
 
-Onespan\footnote{Onespan's official website: \url{www.onespan.com}} (formerly VASCO Data Security International, Inc.) is a global company were most of our research was done. Onespan offers a series of security and authentication products and technologies and specializes in digital identity and anti-fraud solutions. The company continues to be active in research and innovation in different fields of technology, especially cryptography and data science.
+Onespan\footnote{Onespan's official website: \url{https://www.onespan.com}} (formerly VASCO Data Security International, Inc.) is a global company were most of our research was done. Onespan offers a series of security and authentication products and technologies and specializes in digital identity and anti-fraud solutions. The company continues to be active in research and innovation in different fields of technology, especially cryptography and data science.
 
 In this thesis we study the applicability of MPC protocols on deep learning-based face matching and try to implement a privacy-preserving face matching algorithm.
 
@@ -31,6 +31,7 @@ Furthermore the whole design of the neural network including all trained paramet
 In this thesis we try to tackle the need to trust a third party MLaaS provider. We want it to compute an encrypted image on an obfuscated neural network to ouput a correct encrypted result. This encrypted result shall be sent to the client, which will then decrypt it.
 
 \section{Hypothesis}
+\label{chapter:hypothesis}
 \paragraph{How can we securely compute the inference of a deep learning-based facial recognition neural network?}\mbox{} \\
 With the use of MPC protocols we can implement methods such that we can compute a whole face recognition convolutional neural network on an encrypted image of a face. This preserves the privacy of the user while allowing the computation to be outsourced to an untrusted third party.
 \paragraph{How can we optimise the secure facial recognition task to run more efficiently?}\mbox{}

@@ -1,0 +1,4 @@
+TODO: Add https to urls
+TODO: Plot toon goedeme comments
+TODO: Overview figure in introduction
+TODO: Nederlandstalige samenvatting

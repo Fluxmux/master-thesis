@@ -11,8 +11,7 @@
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
 \chapter{Implementation}
-In this chapter we will explain how we implemented MPC for face matching algorithms. We will do this by giving a high-level overview of the system and then diving deeper in more interesting parts. With this information and the code in the appendix, you should be able to reproduce our experiments. You can also checkout our Github repository\footnote{\url{github.com/Fluxmux/securefacematching}}.
-%TODO: Phrase this better
+In this chapter we will explain how we implemented MPC for face matching algorithms. We will do this by giving a high-level overview of the system and then diving deeper in more interesting parts. We also show some techniques to lose some complexity without losing too much accuracy. With the information in this chapter and the code in the appendix, you should be able to reproduce our experiments. Feel free to checkout our code by cloning our GitHub repository\footnote{\url{https://github.com/Fluxmux/securefacematching}}.
 
 \section{Specifications}
 There are two major subprojects. The first subproject (chapter \ref{Deep Learning}) is making sure we can generate the appropriate parameters for the face matching network. It is important that the model is accurate enough. The second subproject (chapter \ref{Secure Functions}) is about transforming the classic machine learning functions to secure ones. To add this security or privacy-preserving factor we use a MPC framework.
@@ -21,7 +20,7 @@ There are two major subprojects. The first subproject (chapter \ref{Deep Learnin
 \label{Deep Learning}
 A machine learning project usually includes on of the popular frameworks available to the public. Since we were already familiar with Pytorch we used this library as a python package.
 
-Pytorch \footnote{\url{pytorch.org}} provides us with a deep learning research platform that provides maximum flexibility and speed. It's fairly easy to use but that doesn't mean we can't design more complex models or features. Pytorch uses tensors, tensors are multi-dimensional matrix containing elements of a single data type. Designing a neural network with Pytorch is as simple as defining a class with the layers in the correct order. An example of a neural network written using pytorch can be seen in the following code (listing~\ref{lst:pytorch_example})\\
+Pytorch \footnote{\url{https://pytorch.org}} provides us with a deep learning research platform that provides maximum flexibility and speed. It's fairly easy to use but that doesn't mean we can't design more complex models or features. Pytorch uses tensors, tensors are multi-dimensional matrix containing elements of a single data type. Designing a neural network with Pytorch is as simple as defining a class with the layers in the correct order. An example of a neural network written using pytorch can be seen in the following code (listing~\ref{lst:pytorch_example})\\
 
 \begin{lstlisting}[language=Python, caption={Pytorch neural network example}, label={lst:pytorch_example}, frame=single]
 class SiameseNetwork(nn.Module):
@@ -93,7 +92,7 @@ As you can see by now, the architecture of a model is extremely important for it
 
 The third step also called the hyperparameter tuning or hyperparameter optimization step, is what makes a good machine learning model even better. This process is not at all logic, experience and intuition can facilitate this. Hyperparameters are all the parameters whose values are set before the learning process begins. There are different methods for optimizing hyperparameters, since we wanted to learn the model and how it behaves relating to small changes in the values of the hyperparameters we went for Manual Random Search. Note that this took us some time because this involves multiple training steps. But since we had a GPU server at our disposal we could parallelize this task. In our case this step improved our accuracy by about 5\%.
 
-We used the Database of Faces\footnote{\url{cam-orl.co.uk/facedatabase.html}} to train and test our face matching algortihm. The dataset contains a set of 10 images of frontal faces with different expressions per person and a total of 40 persons. The pictures are in pgm format which is extremely easy to interact with. They have a dimension of 1 x 92 x 112. An example of a set of images from the dataset can be seen in figure \ref{fig:databaseoffaces}. We divided the dataset in to 3 parts: 75\% training, 12.5\% testing and another 12.5\% for validation.
+We used the Database of Faces\footnote{\url{http://cam-orl.co.uk/facedatabase.html}} to train and test our face matching algortihm. The dataset contains a set of 10 images of frontal faces with different expressions per person and a total of 40 persons. The pictures are in pgm format which is extremely easy to interact with. They have a dimension of 1 x 92 x 112. An example of a set of images from the dataset can be seen in figure \ref{fig:databaseoffaces}. We divided the dataset in to 3 parts: 75\% training, 12.5\% testing and another 12.5\% for validation.
 
 \begin{figure}[H]
   \includegraphics[scale=0.7]{fig/databaseoffacess.png}
@@ -113,7 +112,7 @@ Secure functions or the privacy preserving equivalent of an ordinary function ca
   \label{fig:blackbox}
 \end{figure}
 
-Berry Schoenmakers is a cryptographer working on cryptographic protocols for electronic voting, electronic payments and secure multiparty computation. Since 2018 he has been working on a general MPC implementation for python, called MPyC. This pyhton package can be easily installed with pip: \codeword{pip install mpyc}. The mpyc package defines two new number representation types: SecFxp and SecInt. SecFxp are secure fixed-point numbers. SecInt are secure integers. For more information on how to use this package have a look at the source code at \url{github.com/lschoe/mpyc}.
+Berry Schoenmakers is a cryptographer working on cryptographic protocols for electronic voting, electronic payments and secure multiparty computation. Since 2018 he has been working on a general MPC implementation for python, called MPyC. This pyhton package can be easily installed with pip: \codeword{pip install mpyc}. The mpyc package defines two new number representation types: SecFxp and SecInt. SecFxp are secure fixed-point numbers. SecInt are secure integers. For more information on how to use this package have a look at the source code at \url{https://github.com/lschoe/mpyc}.
 
 There are number of basic functions predefined, like \codeword{add}, \codeword{sub}, \codeword{mul} and \codeword{div}, respectively $+$, $-$, $\times$ and $\div$. As well as \codeword{eq} (equal to), \codeword{ge} (greater than or equal), \codeword{min} and \codeword{max}. The total set of available functions can be found in \codeword{mpyc.runtime.py}. But for our task the functions noted above are all we need.
 
@@ -524,7 +523,7 @@ class SiameseNetwork(nn.Module):
   \label{fig:residualblock}
 \end{figure}
 
-In short, ResNet allows us to use way more layers than before. So we derived our own ResNet-like model, from the pre-trained ResNet models available from Pytorch \footnote{\url{github.com/pytorch/vision/blob/master/torchvision/models/resnet.py}}. We saw an incline in accuracy using ResNet, but with more layers, there are more parameters and the complexity rises.
+In short, ResNet allows us to use way more layers than before. So we derived our own ResNet-like model, from the pre-trained ResNet models available from Pytorch \footnote{\url{https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py}}. We saw an incline in accuracy using ResNet, but with more layers, there are more parameters and the complexity rises.
 
 A basic residual block can be coded in Pytorch in the following way (\ref{lst:residualblock})
 
@@ -562,7 +561,7 @@ Starting with the straightforwardness of the MPC implementation, in other words,
 
 Next, we compare size of the neural network. The neural network's size or it's number of parameters is an equally important factor. Since MPC protocols are way slower than classic computations. We would like our neural network to do fast computations. Fast computations corresponds to less computations, and less computations corresponds to less (or smaller) convolutions or fully-connected layers. Thus we would like our network to have a small number of layers, but still enough to be able to differentiate between faces. Since ResNet only adds extra layers, this model is again not preffered. The other two models have about the same number of parameters, and only the fully-connected layers have a different number of weights and biases.\\
 
-Ranking the neural networks on accuracy (the ability to match faces) was done by testing the four different networks, the results can be seen in table \ref{designaccuracy}. We find that when we are using the Contrastive Loss function, the classic CNN as well as the ResNet model is giving us better results than with the Cross Entropy loss function. Overall the ResNet model has a slightly better accuracy than the classic CNN.
+Ranking the neural networks on accuracy (the ability to match faces) was done by testing the four different networks, the results can be seen in table \ref{table:designaccuracy}. We find that when we are using the Contrastive Loss function, the classic CNN as well as the ResNet model is giving us better results than with the Cross Entropy loss function. Overall the ResNet model has a slightly better accuracy than the classic CNN.
 
 
 \begin{table}[H]
@@ -598,7 +597,7 @@ In the following part of this chapter we will discuss specifically what parts of
   \label{fig:activations}
 \end{figure}
 
-An activation map or feature map is the hidden output activations for a given convolution filter. They are called activation/feature maps because you can clearly see features or certain areas in the output that are more important than others (high activations). Activation maps give an insight to what features the CNN extracts from the input. In figure \ref{activations} an overview of all the activation maps for a certain image can be seen. The first image is the input. The four pictures below that are activation maps of the first layer. The eight pictures below those are the activation maps from the second layer. And the last eight pictures are the activation maps from the last layer.
+An activation map or feature map is the hidden output activations for a given convolution filter. They are called activation/feature maps because you can clearly see features or certain areas in the output that are more important than others (high activations). Activation maps give an insight to what features the CNN extracts from the input. In figure \ref{fig:activations} an overview of all the activation maps for a certain image can be seen. The first image is the input. The four pictures below that are activation maps of the first layer. The eight pictures below those are the activation maps from the second layer. And the last eight pictures are the activation maps from the last layer.
 
 \begin{figure}[H]
   \includegraphics[scale=0.4]{fig/activations/7_1.png}
@@ -647,6 +646,34 @@ In our case we can safely remove any of the convolutions causing the activation 
   \label{fig:pruning_after}
 \end{figure}
 
-Eight out of the twenty convolution filters are infected with this defect, thus can be ignored or even removed from the CNN. This is great news, since this means we are able to optimize the convolutional part of the CNN with a speedup of around 40\%.
+Eight out of the twenty convolution filters are infected with this defect, thus can be ignored or even removed from the CNN. This is great news, since this means we are able to optimize the convolutional part of the CNN with a speedup of around 40\%.\\
+
+Now it is really important that we do the same exact operations that lead the same unencrypted/encrypted input to the same unencrypted/encrypted output. To be sure of how each and every operation works in the cleartext version of the facematching algorithm we strictly follow the Pytorch documentation\footnote{\url{https://pytorch.org/docs/stable/nn.html}}. The \codeword{torch.nn.Conv2d(in_channels, out_channels, kernel_size)} method applies a 2D convolution over an input composed of several input planes. This means that it is possible that more than one tensors can serve as input. This is true in our case for each convolution layer except the first one. The method is implemented as equation \ref{eq:nn.conv2d} where $C$ denotes the number of channels, $\star$ is the 2D cross-correlation operator, $H$ is the height of the input planes and $W$ is the width.
+
+\begin{equation} \label{eq:nn.conv2d}
+  out(C_{out_j}) = bias(C_{out_j}) + \sum_{k=0}^{C_{in}-1}weight(C_{out_j},k) \star input(k)
+\end{equation}
+
+Notice that in our secure implementation of the \codeword{torch.nn.Conv2d(in_channels, out_channels, kernel_size)} we forgot to add biases and we only allow for one input channel. In fact our implementation looks more like a simple cross-correlation operation.
+
+Adding the biases is really simple. And in fact we can just add the bias to each element of the output by defining a new method \codeword{add_bias(tensor, bias)} (listing~\ref{lst:add_bias}). This method takes two argument; a 2D tensor and a single floating-point bias.
+
+\begin{lstlisting}[caption={Code for adding bias to matrix}, label={lst:add_bias}, frame=single, breaklines=true]
+def add_bias(tensor, bias):
+    return np.add(tensor, bias)
+\end{lstlisting}
+
+The only difference that remains, is that the secure convolution function must allow a combination of input planes. To accomodate for this feature, we define a new method \codeword{conv2d(input, kernel, bias)} (listing~\ref{lst:conv2d}) that computes the exact same output tensor as the vanilla Pytorch 2D convolution function with only one difference, it being fully encrypted. Notice that we make use of earlier defined methods.
+
+\begin{lstlisting}[caption={Code for computing total 2D convolution}, label={lst:conv2d}, frame=single, breaklines=true]
+def conv2d(inputs, kernel, bias):
+    output = convolution(inputs[0], kernel)
+    for i in range(1, len(inputs)):
+        output += convolution(inputs[i], kernel)
+    add_bias(output, bias)
+    return output
+\end{lstlisting}
+
+For the remaining parts of this thesis, when we talk about one convolution we imply this algorithm, except when clearly stated.
 
 \section{Conclusion}
