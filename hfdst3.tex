@@ -663,7 +663,7 @@ def add_bias(tensor, bias):
     return np.add(tensor, bias)
 \end{lstlisting}
 
-The only difference that remains, is that the secure convolution function must allow a combination of input planes. To accomodate for this feature, we define a new method \codeword{conv2d(input, kernel, bias)} (listing~\ref{lst:conv2d}) that computes the exact same output tensor as the vanilla Pytorch 2D convolution function with only one difference, it being fully encrypted. Notice that we make use of earlier defined methods.
+The only difference that remains, is that the secure convolution function must allow a combination of input planes. To accomodate for this feature, we define a new method \codeword{conv2d(input, kernel, bias)} that computes the exact same output tensor as the vanilla Pytorch 2D convolution function with only one difference, it being fully encrypted. Notice that we make use of earlier defined methods.
 
 \begin{lstlisting}[caption={Code for computing total 2D convolution}, label={lst:conv2d}, frame=single, breaklines=true]
 def conv2d(inputs, kernel, bias):
@@ -674,6 +674,28 @@ def conv2d(inputs, kernel, bias):
     return output
 \end{lstlisting}
 
-For the remaining parts of this thesis, when we talk about one convolution we imply this algorithm, except when clearly stated.
+For the remaining parts of this thesis, when we talk about one convolution we imply the algorithm stated above (listing~\ref{lst:conv2d}), except when clearly stated.
+
+Of course the convolution needs to be done for each convolution filter on the apropriate set of inputs and in the correct order. Just as in the cleartext algorithm (listing \ref{lst:cnncl}), the convolutions are directly followed by the maxpooling layers, which are in turn, followed by the ReLU activation layers. With the help of the three main building blocks of the secure CNN we can build convolutional part of the CNN. The other part, which entails the fully connected layers, doesn't need to be encrypted, since it is nearly impossible to recognize someone from a one dimensional tensor of activations, even with knowledge of the parameters of the neural network. Thus, this latter part can be computed on only one of the three servers or on the clients device. The calculation of the euclidean distance between the two output tensors must be done on the client's device, because this way the fingerprint (output tensor) of the validation face (the face of the image that we would like to match).\\
+
+The secure face matching algorithm thus exists out of two parts. The first $n$ encrypted layers make up the first part. The second part includes the rest of the convolutions for which the input tensors are deemed unrecognizable and the fully connected layers. The second part can be computed in the classical way on one of the three servers. MPC is only needed for the first part of the algorithm. This heavily reduces the complexity without compensating for security or privacy.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.5]{fig/implementation_overview.png}
+  \centering
+  \caption{Overview of practical implementation of secure face matching algorithm}
+  \label{fig:implementation_overview}
+\end{figure}
+
+Our secure face matching algorithm still isn't complete. For a match to be succesfull a test image needs to be matched to a validation image (or base image). We could calculate the embedding (fingerprint) of this validation image for each face matching task by inferring the image through the CNN. But the result would always be the same, since the input doesn't change. Therefore it is sufficient to calculate the fingerprint of the image once and store it for a certain period on the client's device. If the fingerprint of the validation face is never shared and stays on the client's device during all times. Than it is safe to assume that the outcome of the face matching algorithm, a match or not a match, is also secure and private. An overview of this implementation is given in figure \ref{fig:implementation_overview}. The legend describes what parts of the process happen on the client's device or on the servers, and what parts are encrypted or public.
 
 \section{Conclusion}
+Implementing a secure face matching algorithm is not a straightforward process. This chapter describes what decisions we made, and what choices led to our implementation of the secure face matching algorithm. Of course there are several ways to implement such a complex task, but we will not be discussing those. A lot of effort has been put in optimizing the algorithm such that three core principles are obeyed:
+
+\begin{enumerate}
+\item The computation of the face matching task needs to be outsourced to public servers as much as possible.
+\item The public servers can not recognize the input images nor the output of the face matching task.
+\item The face matching algorithm must be reliable and accurate.
+\end{enumerate}
+
+If and only if all three of above principles are verifiable, the face mathcing algorithm tends to give good results, is secure and the privacy of the client is protected.
