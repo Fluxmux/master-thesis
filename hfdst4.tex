@@ -37,7 +37,7 @@ Image sharpening is a classic computer vision task. The task can be completed us
   \label{fig:sharp_mask}
 \end{figure}
 
-This demonstration nicely illustrates the possibilities for using secure convolutions and possibly other image processing tasks such as corner or edge detection. There are a total of two convolutions filters sized $3$x$3$. For an input image of size $100$x$100$ the total MPC running time which includes the two secure convolutions, the multiplication of the factor and the addition of the detailed images to the original images, equals to 60-80 seconds. For a bigger picture (figure \ref{fig:sharpened_image}), sized $640$x$360$, the computation takes much longer since the number of convolutions goes up drastically. The MPC computation time for those bigger pictures can take up to 5 minutes. An example of a sharpened image can be found below.
+This demonstration nicely illustrates the possibilities for using secure convolutions and possibly other image processing tasks such as corner or edge detection. There are a total of two convolutions filters sized $3$x$3$. For an input image of size $100$x$100$ the total MPC running time which includes the two secure convolutions, the multiplication of the factor and the addition of the detailed images to the original images, equals to 60-80 seconds. For a bigger picture (figure \ref{fig:sharpened_image}), sized $640$x$360$, the computation takes much longer since the number of convolutions goes up drastically. The MPC computation time for those bigger pictures can take up to 5 minutes. An example of a securely sharpened image can be found below.
 
 \begin{figure}[H]
   \includegraphics[scale=0.5]{fig/sharpened_image.png}
@@ -46,11 +46,54 @@ This demonstration nicely illustrates the possibilities for using secure convolu
   \label{fig:sharpened_image}
 \end{figure}
 
-Notice that the contours and sharp lines in the original image are much more visible in the sharpened image.
+Notice that the contours and sharp lines in the original image are much more visible in the sharpened image. Let us revise what exactly happend from a security point of view. The client takes a picture with their device. Then they encrypt the picture, by using Shamir's secret sharing scheme. The secret shares of the encrypted image then gets sent to the appropriate three MPC servers. These servers now do the convolution to sharpen the image. Note that the parameters of the convolution filters are also encrypted, this means that the intellectual property of the algorithm stays protected. Of course this is not really usefull for the image sharpening algorithm since it's publicly known what parameters are best chosen for the convolutions. But for algorithms that are not already known and would lose their value or income if they would be revealed, this feature would enable the parameters of those algorithms to stay private. After the server are done with the MPC protocol. The servers recombine their secret shares to get the output, the sharpened image.
 
 \section{Results}
 \subsection{Reliability results}
 \subsection{Timing results}
+In this section we show the complexity of the different secure operations (single convolution, maxpooling and ReLU) and the different parts of the MPC protocol, secret sharing and share recombination for example. We do this by measuring how long it takes to perform the operation on a matrices with variable sizes. We then compare these results to their classic unencrypted equivalents.\\
+
+We define our testing vector (the input image) as $I$ of size $s$x$s$, the kernel $K$ of size $3$x$3$ and the computation time $t$. Note that we only measure the computation time of one party. However that is fine, since the parties are running parallelized and they take around the same time to finish their computations.\\
+
+The testing vector $I$ is randomly generated with values uniformly distributed over the range $[0,1]$.
+
+\subsubsection{Convolution}
+For this operation we have four different implementations as can be seen in figure \ref{fig:convolution_test}. The first one uses MPC to encrypt the input $I$. The second one uses MPC to encrypt both the image $I$ and the kernel $K$. The third convolution function is \codeword{torch.nn.Conv2d} from the Pytorch package. The last function is the cleartext equivalent of the MPC secure function but instead of using secret shares as input it only takes cleartext floating points and does not use the MPC framework.\\
+
+The first two functions and the last function are defined in listing \ref{lst:convolution} of chapter \ref{Secure Functions}.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.6]{fig/convolution_test.png}
+  \centering
+  \caption{Computation time for encrypted and unencrypted convolution functions}
+  \label{fig:convolution_test}
+\end{figure}
+
+We observe that the Pytorch function is the fastest one of the four. The unencrypted convolution function is of a magnitude $10^2$ slower. The two other encrypted convolution take about the same time to complete. However, the convolution function where the kernel is also encrypted is a tad slower. This is logical, since communication between the MPC servers is needed for multiplication of two secrets (as seen in chapter \ref{Arithmetic operators}).
+
+\subsubsection{Maxpooling}
+In figure \ref{fig:maxpooling_test} three different max pooling functions are plotted over the size $s$ of the input $I$, while these functions are differently implemented the result is the same. The window size is $2$ and the stride is also $2$. The secure max pooling function uses MPC as means to encrypt the input $I$ and is defined in listing \ref{lst:maxpooling} of chapter \ref{Secure Functions}. The pytorch max pooling function is \codeword{torch.nn.MaxPool2d} of the Pytorch package. The unencrypted max pooling function is the equivalent of the first encrypted function but instead of secret shares it uses cleartext floating points as input, and it does not utilize the MPC framework at all.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.7]{fig/maxpooling_test.png}
+  \centering
+  \caption{Computation time for encrypted and unencrypted max pooling functions}
+  \label{fig:maxpooling_test}
+\end{figure}
+
+We can clearly see that the Pytorch function is the most optimized function and runs the fastest. The unencrypted max pooling function is a factor of $10^1$ to $10^2$ slower. The MPC encrypted max pooling function is the slowest and reaches almost 100 seconds for max pooling over an image $I$ of size $s = 250$.
+
+\subsubsection{ReLU}
+In figure \ref{fig:relu_tests} three different functions are plotted for an image $I$ with sizes $s$ in range $s \in [10,250]$. The secure ReLU function is defined in listing \ref{lst:relu} of chapter \ref{Secure Functions} and uses MPC to encrypt the input $I$. The Pytorch ReLU function is \codeword{torch.nn.ReLU} from the Pytorch package. The results for this function shows very fast computation, this is because Pytorch is deeply integrated with C++ code. Finally, the unencrypted is the insecure equivalent of the first function but instead of using the MPC framework and giving secret shares as input, regular floating points are given as input.
+
+\begin{figure}[H]
+  \includegraphics[scale=0.7]{fig/relu_tests.png}
+  \centering
+  \caption{Computation time for encrypted and unencrypted ReLU activation functions}
+  \label{fig:relu_tests}
+\end{figure}
+
+The results are predictable, of course the Pytorch function is the fastest because of its utilization of C++ code. The unencrypted ReLU function is about ten times slower. The MPC secure function is about $10^4$ as slow as the Pytorch function and $10^3$ as slow as its unencrypted equivalent.
 
 \section{Discussion}
 

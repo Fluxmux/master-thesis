@@ -1,5 +1,9 @@
-TODO: Add https to urls
+DONE: Add https to urls
 TODO: Plot toon goedeme comments
 TODO: Overview figure in introduction
 TODO: Nederlandstalige samenvatting
 TODO: maxpooling, fully connected layer, face matching
+TODO: relu precision
+TODO: add figure mpc_shells.png in text
+FUTURE: add implementation for pytorch so that we can just do net.run()
+TODO: add timing results for secret sharing and for secret recombination

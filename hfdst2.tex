@@ -142,6 +142,7 @@ It's important to make sure the parties are distributed and to try minimizing th
 A neural network can be seen as an enormous function with millions of coefficients. Lucky for us the function can be broken up into 3 different operations: addition and multiplication in fully connected and convolution layers and a relational operator for max pooling and ReLU activation function. We will now show how to securely compute each of these basic operations.
 
 \subsubsection{Arithmetic operators}
+\label{Arithmetic operators}
 Addition, subtraction, division and multiplication all fall under arithmetic operations. In this section we will take a look at how these operations can be performed in MPC.
 \paragraph{linear protocols:}
 Since Shamir's secrete sharing scheme is a linear sharing scheme, each party $P_i$ can locally compute any linear combination of a public or secret value with their secret share $[s]_i$. This gives us following operations:
