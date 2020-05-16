@@ -124,7 +124,7 @@ We introduce three essential custom secure functions that can be found in \codew
 
 \begin{itemize}
   \item \codeword{convolution}
-  \item \codeword{maxpooling}
+  \item \codeword{maxpool}
   \item \codeword{relu}
 \end{itemize}
 
@@ -155,9 +155,9 @@ def convolution(X, W):
 
 Note that the number representation types that will be used in this secure convolution function, are not simple integers or floats. $X$, $W$ and $Y$ are matrices of SecInt's or SecFxp's.\\
 
-\codeword{maxpooling} is a secure function (listing~\ref{lst:maxpooling}). The function takes one argument as input, $X$ an image of size $(m,n)$. We define a specific type of maxpooling, the pooling window has a size of $2$ by $2$ and the stride is equal to $2$. The output $Y$ is a matrix of size $(\floor*{\frac{m}{2}}, \floor*{\frac{n}{2}})$.
+\codeword{maxpool} is a secure function (listing~\ref{lst:maxpooling}). The function takes one argument as input, $X$ an image of size $(m,n)$. We define a specific type of max pooling, the pooling window has a size of $2$ by $2$ and the stride is equal to $2$. The output $Y$ is a matrix of size $(\floor*{\frac{m}{2}}, \floor*{\frac{n}{2}})$.
 
-\begin{lstlisting}[language=Python, caption={Secure maxpooling function}, label={lst:maxpooling}, frame=single, breaklines=true]
+\begin{lstlisting}[language=Python, caption={Secure max pooling function}, label={lst:maxpooling}, frame=single, breaklines=true]
 def maxpool(X):
     m, n = dim(X)
     Y = [None] * (m // 2)
@@ -226,9 +226,16 @@ PARTY_2_HOST=localhost
 PARTY_2_PORT=5002
 \end{lstlisting}
 
-When all three parties (server) are up and running, the user (device) can start encrypting their input image containing their face using Shamir's secret sharing scheme (listing \ref{lst:ssss}). The user shares each pixel of the image in to three secret shares, one for each party. The user then sends their three sets of secret shares (encrypted image) to the parties, each party receives only one set of shares.
+When all three parties (server) are up and running as can be seen in figure \ref{fig:mpc_shells}, the user (device) can start encrypting their input image containing their face using Shamir's secret sharing scheme (listing \ref{lst:ssss}). The user shares each pixel of the image in to three secret shares, one for each party. The user then sends their three sets of secret shares (encrypted image) to the parties, each party receives only one set of shares.
 
-\begin{lstlisting}[caption={Shamir secret sharing algorithm}, label={lst:ssss}, frame=single, breaklines=true]
+\begin{figure}[H]
+  \includegraphics[scale=0.5]{fig/mpc_shells.png}
+  \centering
+  \caption{Each MPC party has their own interactive shell}
+  \label{fig:mpc_shells}
+\end{figure}
+
+\begin{lstlisting}[caption={Shamir secret sharing algorithm (part of MPyC framework)}, label={lst:ssss}, frame=single, breaklines=true]
 def random_split(s, t, m):
     field = type(s[0])
     p = field.modulus
@@ -334,7 +341,7 @@ The value of the api argument from the GET request determines which MPC script g
   \label{fig:implementationoverview}
 \end{figure}
 
-Last but not least, we discuss the mpc script that needs to run on the three parties. This script does the actual MPC. Each party holds an identical copy of this script. The parties begin by opening connections with each other (\codeword{mpc.start}). Remember: parties need to communicate with each other in order to output a result or to do non-linear operations such as multiplication of two secure numbers. Then the parties load the unique secret shares for the image and the convolution kernels stored in their MongoDB databases. Since the secret shares are stored in lists in the database, the parties reshape them to the original shape. Then the parties securely compute an output for the input image and kernels on a series of sequential layers (convolution, maxpooling and relu) made out of the essential building blocks we introduced at the beginning of this chapter. Finally the parties output the result (\codeword{mpc.output}) print the result (printing in python has the same effect as writing to STDOUT) but they do this in a manner such that the stream is parsed. Note that all parties print the result, but only PARTY\_0's STDOUT will be looked at. This is yet another flaw of our implementation. Better would be to look at everybody's STDOUT, to check if anyone is cheating by printing something other than the true result. Finally the parties begin shutting down (mpc.shutdown), closing all open connections. The subprocess will exit, unpausing the parent process. Which will unparse the STDOUT and return the result as a response to the device.\\
+Last but not least, we discuss the mpc script that needs to run on the three parties. This script does the actual MPC. Each party holds an identical copy of this script. The parties begin by opening connections with each other (\codeword{mpc.start}). Remember: parties need to communicate with each other in order to output a result or to do non-linear operations such as multiplication of two secure numbers. Then the parties load the unique secret shares for the image and the convolution kernels stored in their MongoDB databases. Since the secret shares are stored in lists in the database, the parties reshape them to the original shape. Then the parties securely compute an output for the input image and kernels on a series of sequential layers (convolution, max pooling and ReLU) made out of the essential building blocks we introduced at the beginning of this chapter. Finally the parties output the result (\codeword{mpc.output}) print the result (printing in python has the same effect as writing to STDOUT) but they do this in a manner such that the stream is parsed. Note that all parties print the result, but only PARTY\_0's STDOUT will be looked at. This is yet another flaw of our implementation. Better would be to look at everybody's STDOUT, to check if anyone is cheating by printing something other than the true result. Finally the parties begin shutting down (mpc.shutdown), closing all open connections. The subprocess will exit, unpausing the parent process. Which will unparse the STDOUT and return the result as a response to the device.\\
 
  A basic example of an mpc script that contains all of the points made earlier can be observed in listing \ref{lst:mpcscript}.
 
@@ -369,7 +376,7 @@ if __name__ == '__main__':
     mpc.run(main())
 \end{lstlisting}
 
-Obviously a CNN has way more layers than just this triplet (convolution, maxpooling and relu). But we will discuss the secure design of the CNN later on in chapter \ref{SecureCNN}.
+Obviously a CNN has way more layers than just this triplet (convolution, max pooling and ReLU). But we will discuss the secure design of the CNN later on in chapter \ref{SecureCNN}.
 
 \section{Design}
 \label{Design}
@@ -408,7 +415,7 @@ The convolution layers, including Max-pooling (2 x 2 with stride 2) and ReLU aft
 
 Each of these layers have different tasks. The first layers have larger convolution filters, these convolutions detect high-level features like distance or rotation between ears, nose and/or eyes. While the latter, smaller convolution filters detect low-level features like lines or dots (jawline, eyes, mouth).
 
-After the final convolution layer we flatten the output layer to a one-dimensional tensor. This tensor then serves as input for a small fully-connected neural network (perceptron), this network can be seen as an extension of the CNN. We use this fully-connected neural network to add global spatial correlation (a CNN is good for recognizing structures in local and neighbouring pixels). Since it's important to also important that the algorithm detects two objects or features that belong to each other even though they are seperated and are not local or neighbouring, think of two ears on a face for instance.\\
+After the final convolution layer we flatten the output layer to a one-dimensional tensor. This tensor then serves as input for a small fully connected neural network (perceptron), this network can be seen as an extension of the CNN. We use this fully connected neural network to add global spatial correlation (a CNN is good for recognizing structures in local and neighbouring pixels). Since it's important to also important that the algorithm detects two objects or features that belong to each other even though they are seperated and are not local or neighbouring, think of two ears on a face for instance.\\
 
 The total number of learnable parameters (weights and biases) in this neural network is 154.592, the model doesn't show any sign of overfitting nor underfitting up to 500 epochs.\\
 
@@ -448,7 +455,7 @@ class SiameseNetwork(nn.Module):
         return output1, output2
 \end{lstlisting}
 
-\textbf{CNN with Cross Entropy Loss:} The following model (figure \ref{fig:cnncel}) is similar to the first one we described earlier. The key differences of this model, is that the siamese neural network stops after the last layer. The two output layers get flattened to two single one-dimensional tensors. These tensors then get concatenated. The concatenated tensor now gets sent trough a single fully-connected neural network (perceptron).\\
+\textbf{CNN with Cross Entropy Loss:} The following model (figure \ref{fig:cnncel}) is similar to the first one we described earlier. The key differences of this model, is that the siamese neural network stops after the last layer. The two output layers get flattened to two single one-dimensional tensors. These tensors then get concatenated. The concatenated tensor now gets sent trough a single fully connected neural network (perceptron).\\
 
 \begin{figure}[H]
   \includegraphics[scale=0.7]{fig/cnncel.png}
@@ -559,7 +566,7 @@ As we said before choosing a neural network depends on a number of factors, we w
 
 Starting with the straightforwardness of the MPC implementation, in other words, how easy will it be to translate the code written with Pytorch to a MPC algorithm using no libraries for neural networks (since Pytorch doesn't support secure datatypes). It's obvious that a ResNet architecture requires more attention to detail and is more complex to implement. The other two neural networks require less attention to detail, thus are more easy to implement.\\
 
-Next, we compare size of the neural network. The neural network's size or it's number of parameters is an equally important factor. Since MPC protocols are way slower than classic computations. We would like our neural network to do fast computations. Fast computations corresponds to less computations, and less computations corresponds to less (or smaller) convolutions or fully-connected layers. Thus we would like our network to have a small number of layers, but still enough to be able to differentiate between faces. Since ResNet only adds extra layers, this model is again not preffered. The other two models have about the same number of parameters, and only the fully-connected layers have a different number of weights and biases.\\
+Next, we compare size of the neural network. The neural network's size or it's number of parameters is an equally important factor. Since MPC protocols are way slower than classic computations. We would like our neural network to do fast computations. Fast computations corresponds to less computations, and less computations corresponds to less (or smaller) convolutions or fully connected layers. Thus we would like our network to have a small number of layers, but still enough to be able to differentiate between faces. Since ResNet only adds extra layers, this model is again not preffered. The other two models have about the same number of parameters, and only the fully connected layers have a different number of weights and biases.\\
 
 Ranking the neural networks on accuracy (the ability to match faces) was done by testing the four different networks, the results can be seen in table \ref{table:designaccuracy}. We find that when we are using the Contrastive Loss function, the classic CNN as well as the ResNet model is giving us better results than with the Cross Entropy loss function. Overall the ResNet model has a slightly better accuracy than the classic CNN.
 
@@ -586,7 +593,7 @@ Taking every factor in to consideration, we concluded that a classic CNN with Co
 
 \subsection{Secure CNN}
 \label{SecureCNN}
-In the following part of this chapter we will discuss specifically what parts of the classic CNN we will encrypt. We ask ourselves the question: After how many convolution layers, ReLU layers and maxpooling layers will the output be unrecognizable?\\
+In the following part of this chapter we will discuss specifically what parts of the classic CNN we will encrypt. We ask ourselves the question: After how many convolution layers, ReLU layers and max pooling layers will the output be unrecognizable?\\
 
  Suppose that the activations after the first $n$ layers can not be traced back to the face present on the input image, then we don't need to encrypt the whole CNN but only the first $n$ layers. We could split up the neural network in two parts; a part that is encrypted and uses MPC to do certain operations and a part that is unencrypted. Of course the encrypted part must be placed before the unencrypted part. Otherwise the face would not be encrypted.
 
@@ -606,7 +613,7 @@ An activation map or feature map is the hidden output activations for a given co
   \label{fig:activation_1}
 \end{figure}
 
-As you can see in figure \ref{fig:activation_1} the activation maps after the first layer are not obfuscated enough and can be recognized fairly easily by machines or humans. Thus only encrypting this part of the CNN would not be sufficient for a privacy preserving face matching algorithm. Notice how the resolution of the image became twice as small (this effect is caused by maxpooling) and is thereby much more difficult to recognize. Another perturbation that's taking place is the ReLU activation function, discarding all negative values from the output. Lastly the convolutions can cause small or great perturbations to the image depending on the convolution filter.
+As you can see in figure \ref{fig:activation_1} the activation maps after the first layer are not obfuscated enough and can be recognized fairly easily by machines or humans. Thus only encrypting this part of the CNN would not be sufficient for a privacy preserving face matching algorithm. Notice how the resolution of the image became twice as small (this effect is caused by max pooling) and is thereby much more difficult to recognize. Another perturbation that is taking place is the ReLU activation function, discarding all negative values from the output. Lastly the convolutions can cause small to great perturbations to the image depending on the convolution filter.
 
 \begin{figure}[H]
   \includegraphics[scale=0.4]{fig/activations/7_2.png}
@@ -648,7 +655,7 @@ In our case we can safely remove any of the convolutions causing the activation 
 
 Eight out of the twenty convolution filters are infected with this defect, thus can be ignored or even removed from the CNN. This is great news, since this means we are able to optimize the convolutional part of the CNN with a speedup of around 40\%.\\
 
-Now it is really important that we do the same exact operations that lead the same unencrypted/encrypted input to the same unencrypted/encrypted output. To be sure of how each and every operation works in the cleartext version of the facematching algorithm we strictly follow the Pytorch documentation\footnote{\url{https://pytorch.org/docs/stable/nn.html}}. The \codeword{torch.nn.Conv2d(in_channels, out_channels, kernel_size)} method applies a 2D convolution over an input composed of several input planes. This means that it is possible that more than one tensors can serve as input. This is true in our case for each convolution layer except the first one. The method is implemented as equation \ref{eq:nn.conv2d} where $C$ denotes the number of channels, $\star$ is the 2D cross-correlation operator, $H$ is the height of the input planes and $W$ is the width.
+Now it is really important that we do the same exact operations that lead the same unencrypted/encrypted input to the same unencrypted/encrypted output. To be sure of how each and every operation works in the cleartext version of the face matching algorithm we strictly follow the Pytorch documentation\footnote{\url{https://pytorch.org/docs/stable/nn.html}}. The \codeword{torch.nn.Conv2d(in_channels, out_channels, kernel_size)} method applies a 2D convolution over an input composed of several input planes. This means that it is possible that more than one tensors can serve as input. This is true in our case for each convolution layer except the first one. The method is implemented as equation \ref{eq:nn.conv2d} where $C$ denotes the number of channels, $\star$ is the 2D cross-correlation operator, $H$ is the height of the input planes and $W$ is the width.
 
 \begin{equation} \label{eq:nn.conv2d}
   out(C_{out_j}) = bias(C_{out_j}) + \sum_{k=0}^{C_{in}-1}weight(C_{out_j},k) \star input(k)
@@ -676,7 +683,7 @@ def conv2d(inputs, kernel, bias):
 
 For the remaining parts of this thesis, when we talk about one convolution we imply the algorithm stated above (listing~\ref{lst:conv2d}), except when clearly stated.
 
-Of course the convolution needs to be done for each convolution filter on the apropriate set of inputs and in the correct order. Just as in the cleartext algorithm (listing \ref{lst:cnncl}), the convolutions are directly followed by the maxpooling layers, which are in turn, followed by the ReLU activation layers. With the help of the three main building blocks of the secure CNN we can build convolutional part of the CNN. The other part, which entails the fully connected layers, doesn't need to be encrypted, since it is nearly impossible to recognize someone from a one dimensional tensor of activations, even with knowledge of the parameters of the neural network. Thus, this latter part can be computed on only one of the three servers or on the clients device. The calculation of the euclidean distance between the two output tensors must be done on the client's device, because this way the fingerprint (output tensor) of the validation face (the face of the image that we would like to match).\\
+Of course the convolution needs to be done for each convolution filter on the apropriate set of inputs and in the correct order. Just as in the cleartext algorithm (listing \ref{lst:cnncl}), the convolutions are directly followed by the max pooling layers, which are in turn, followed by the ReLU activation layers. With the help of the three main building blocks of the secure CNN we can build convolutional part of the CNN. The other part, which entails the fully connected layers, doesn't need to be encrypted, since it is nearly impossible to recognize someone from a one dimensional tensor of activations, even with knowledge of the parameters of the neural network. Thus, this latter part can be computed on only one of the three servers or on the clients device. The calculation of the euclidean distance between the two output tensors must be done on the client's device, because this way the fingerprint (output tensor) of the validation face (the face of the image that we would like to match).\\
 
 The secure face matching algorithm thus exists out of two parts. The first $n$ encrypted layers make up the first part. The second part includes the rest of the convolutions for which the input tensors are deemed unrecognizable and the fully connected layers. The second part can be computed in the classical way on one of the three servers. MPC is only needed for the first part of the algorithm. This heavily reduces the complexity without compensating for security or privacy.
 
