@@ -39,7 +39,7 @@ Image sharpening is a classic computer vision task. The task can be completed us
   \label{fig:sharp_mask}
 \end{figure}
 
-This demonstration nicely illustrates the possibilities for using secure convolutions and possibly other image processing tasks such as corner or edge detection. There are a total of two convolutions filters sized $3$x$3$. For an input image of size $100$x$100$ the total MPC running time which includes the two secure convolutions, the multiplication of the factor and the addition of the detailed images to the original images, equals to 60-80 seconds. For a bigger picture (figure \ref{fig:sharpened_image}), sized $640$x$360$, the computation takes much longer since the number of convolutions goes up drastically. The MPC computation time for those bigger pictures can take up to 5 minutes. An example of a securely sharpened image can be found below.
+This demonstration nicely illustrates the possibilities for using secure convolutions and possibly other image processing tasks such as corner or edge detection. There are a total of two convolutions filters sized $3$x$3$. For an input image of size $100$x$100$ the total MPC running time which includes the two secure convolutions, the multiplication of the factor and the addition of the detailed images to the original images, equals to 60-80 seconds. For a bigger picture (figure \ref{fig:sharpened_image}), sized $640$x$360$, the computation takes much longer since the number of input pixels goes up drastically. The MPC computation time for those bigger pictures can take up to 5 minutes. An example of a securely sharpened image can be found below.
 
 \begin{figure}[H]
   \includegraphics[scale=0.5]{fig/sharpened_image.png}
@@ -119,30 +119,30 @@ The crashes on the servers cause a connection timeout on the device. And happen 
   \item The number of convolutions for an input of size 100x100 is greater than one.
 \end{itemize}
 
-Another problem is the fact that the secure operations are very complex and take a lot of time to complete. An estimation of the total time it would take to complete one inference of the secure CNN in it's current form (with pruning) is calculated below (equation \ref{eq:comp_time}) taking into account the results from the computation time tests.\\
+Another problem is the fact that the secure operations are very complex and take a lot of time to complete. An estimation of the total time it would take to complete one inference of the secure CNN in it's current form (without pruning) is calculated below (equation \ref{eq:comp_time}) taking into account the results from the computation time tests.\\
 
 Secure face matching algorithm step per step:
 \begin{itemize}
   \item 1 x secret sharing on $I$ with $s=100$
-  \item 2 x single convolution on $I$ with $s=100$
-  \item 2 x max pooling on $I$ with $s=98$
-  \item 2 x ReLU on $I$ with $s=49$
-  \item 10 x single convolution on $I$ with $s=49$
-  \item 5 x max pooling on $I$ with $s=47$
-  \item 5 x ReLU on $I$ with $s=23$
-  \item 25 x single convolution on $I$ with $s=23$
-  \item 5 x max pooling on $I$ with $s=21$
-  \item 5 x ReLU on $I$ with $s=10$
-  \item 5 x secret recombination on $I$ with $s=10$
+  \item 4 x single convolution on $I$ with $s=100$
+  \item 4 x max pooling on $I$ with $s=98$
+  \item 4 x ReLU on $I$ with $s=49$
+  \item 32 x single convolution on $I$ with $s=49$
+  \item 8 x max pooling on $I$ with $s=47$
+  \item 8 x ReLU on $I$ with $s=23$
+  \item 64 x single convolution on $I$ with $s=23$
+  \item 8 x max pooling on $I$ with $s=21$
+  \item 8 x ReLU on $I$ with $s=10$
+  \item 8 x secret recombination on $I$ with $s=10$
 \end{itemize}
 
 \begin{equation} \label{eq:comp_time}
   \begin{aligned}
-      t_{total} = & 1\times0.0476166 + 2\times14.8732678 + 2\times2.0341087 + 2\times0.4950582\\
-                & + 10\times2.792582 + 5\times0.6305378 + 5\times0.1049295 + 25\times0.4898818\\
-                & + 5\times0.1172477 + 5\times0.073816 + 5\times 0.0109198\\
-      t_{total} = & 79.712605
+      t_{total} = & 1\times0.0476166 + 4\times14.8732678 + 4\times2.0341087 + 4\times0.4950582\\
+                & + 32\times2.792582 + 8\times0.6305378 + 8\times0.1049295 + 64\times0.4898818\\
+                & + 8\times0.1172477 + 8\times0.073816 + 8\times 0.0109198\\
+      t_{total} = & 197.872021
   \end{aligned}
 \end{equation}
 
-The total computation time for one inference through the secure CNN is about 80 seconds. But this seems a bit contradictive and we are sure some elements like parties waiting on eachother are not taken into account. But since we do not have a practical working implementation of the secure face matching algorithm we can not say for certain how long it would take to complete one task.
+The total computation time for one inference through the secure CNN is approximately 198 seconds. This however, seems pretty optimistic. We are sure some elements like parties waiting on eachother are not taken into account. But since we do not have a practical working implementation of the secure face matching algorithm we can not say for certain how long it would take to complete one task. From what we know, we can say that one inference takes at least than 3 minutes and the total timings in practice could range from 5 to 15 minutes\footnote{Based from the information we gathered while working on the algorithm}.
