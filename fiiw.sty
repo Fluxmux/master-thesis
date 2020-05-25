@@ -110,6 +110,7 @@
 \newif\iflistofsymbolspage
 \newif\iflistofabbrevspage
 \newif\ifacknowledgementspage
+\newif\ifdutchabstractpage
 \newif\ifsummarypage
 \newif\ifabstractpage
 
@@ -124,6 +125,9 @@
 
 \acknowledgementspagefalse
 \def\acknowledgements#1{\gdef\@acknowledgementsfile{\input{#1}}}
+
+\dutchabstractpagefalse
+\def\dutchabstracts#1{\gdef\@abstractfiledutch{\input{#1}}}
 
 \abstractpagefalse
 \def\abstracts#1{\gdef\@abstractfile{\input{#1}}}
@@ -338,9 +342,14 @@
 		\addcontentsline{toc}{chapter}{Acknowledgements}
 	\fi
 
+	\ifdutchabstractpage
+		\chapter*{Nederlandstalig Abstract} \@abstractfiledutch
+		\addcontentsline{toc}{chapter}{Dutch Abstract}
+	\fi
+
 	\ifsummarypage
 		\chapter*{Nederlandstalige Samenvatting} \@summaryfile
-		\addcontentsline{toc}{chapter}{Nederlandstalige Samenvatting}
+		\addcontentsline{toc}{chapter}{Dutch Summary}
 	\fi
 
 	\ifabstractpage
@@ -349,17 +358,18 @@
 	\fi
 
 
+
 	\tableofcontents
-	\addcontentsline{toc}{chapter}{Inhoud}
+	\addcontentsline{toc}{chapter}{Contents}
 
 	\iflistoffigurespage
 		\listoffigures
-		\addcontentsline{toc}{chapter}{Figurenlijst}
+		\addcontentsline{toc}{chapter}{List of figures}
 	\fi
 
 	\iflistoftablespage
 		\listoftables
-		\addcontentsline{toc}{chapter}{Tabellenlijst}
+		\addcontentsline{toc}{chapter}{List of tables}
 	\fi
 
 	\iflistofsymbolspage
