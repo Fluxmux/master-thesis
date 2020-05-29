@@ -1,4 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Euclidean%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                 %
 %                            CHAPTER                              %
 %                                                                 %
@@ -18,9 +18,9 @@ There are two major subprojects. The first subproject (chapter \ref{Deep Learnin
 
 \subsection{Deep Learning}
 \label{Deep Learning}
-A machine learning project usually includes on of the popular frameworks available to the public. Since we were already familiar with Pytorch we used this library as a python package.
+A machine learning project usually includes on of the popular frameworks available to the public. Since we were already familiar with Pytorch we used this library as a Python package.
 
-Pytorch \footnote{\url{https://pytorch.org}} provides us with a deep learning research platform that provides maximum flexibility and speed. It's fairly easy to use but that doesn't mean we can't design more complex models or features. Pytorch uses tensors, tensors are multi-dimensional matrix containing elements of a single data type. Designing a neural network with Pytorch is as simple as defining a class with the layers in the correct order. An example of a neural network written using pytorch can be seen in the following code (listing~\ref{lst:pytorch_example})\\
+Pytorch \footnote{\url{https://pytorch.org}} provides us with a deep learning research platform that provides maximum flexibility and speed. It's fairly easy to use but that doesn't mean we can't design more complex models or features. Pytorch uses tensors, tensors are multi-dimensional matrix containing elements of a single data type. Designing a neural network with Pytorch is as simple as defining a class with the layers in the correct order. An example of a neural network written using Pytorch can be seen in the following code (listing~\ref{lst:pytorch_example})\\
 
 \begin{lstlisting}[language=Python, caption={Pytorch neural network example}, label={lst:pytorch_example}, frame=single]
 class SiameseNetwork(nn.Module):
@@ -41,9 +41,9 @@ Making an accurate face matching neural network. Is a process that involves thre
 
 First of all the design or architecture of the network gets chosen. There exist a number of different topologies used in deep neural networks. But often choosing which one to take and how many layers to use, is the most difficult task. We will cover the architecture of the model in chapter \ref{ConvolutionalNeuralNetworkArchitecture}. Adding more layers is the same as adding more parameters. And a model with more parameters is more complex.
 
-The second step is called the traing of the neural network. Training is done using a part of the dataset that is specific for training and shouldn't be used for anything else.
+The second step is called the training of the neural network. Training is done using a part of the dataset that is specific for training and shouldn't be used for anything else.
 
-A typical workflow of the training step looks something like this: Two labeled faces are sent seperatly sent through the network. The euclidean distance (equation \ref{eq:euclideandistance}) for inputs $\vec{X_{1}}$ and $\vec{X_{2}}$ and the parameterized function $G_{W}$ calculates the distance between the outputs. This distance metric should be close to zero for faces belonging to the same person. But as large as possible for faces belonging to different person.
+A typical workflow of the training step looks something like this: Two labeled faces are sent separately sent through the network. The Euclidean distance (equation \ref{eq:euclideandistance}) for inputs $\vec{X_{1}}$ and $\vec{X_{2}}$ and the parameterized function $G_{W}$ calculates the distance between the outputs. This distance metric should be close to zero for faces belonging to the same person. But as large as possible for faces belonging to different person.
 
 \begin{equation} \label{eq:euclideandistance}
   D_{W}(\vec{X_{1}},\vec{X_{2}})=\lVert G_{W}(\vec{X_{1}}) - G_{W}(\vec{X_{2}}) \rVert
@@ -57,9 +57,9 @@ Let $Y$ be the binary label assigned to this pair of faces, $Y=0$ if $\vec{X_{1}
   L(W,Y,\vec{X_{1}},\vec{X_{2}})=(1-Y)\frac{1}{2}(D_{W})^{2} + Y\frac{1}{2}(max^{2}(0, m - D_{W}))
 \end{equation}
 
-The contrastive loss function is definded in formula \ref{eq:contrastiveloss}, where $m > 0$ is the margin. The margin $m$ can be seen as a radius so that dissimilar pairs still contribute to the loss function if their distance is withing this radius. The goal of training is to minimize the loss. For similar pairs this means decreasing the distance $D_{W}$, for dissimilar pairs this means increasing the distance to be greater than the margin. We came to the conclusion that our loss reduces the most if we choose a margin of $m=2$.
+The contrastive loss function is defined in formula \ref{eq:contrastiveloss}, where $m > 0$ is the margin. The margin $m$ can be seen as a radius so that dissimilar pairs still contribute to the loss function if their distance is within this radius. The goal of training is to minimize the loss. For similar pairs this means decreasing the distance $D_{W}$, for dissimilar pairs this means increasing the distance to be greater than the margin. We came to the conclusion that our loss reduces the most if we choose a margin of $m=2$.
 
-We also tried a different approach, instead of using this distance metric (which we would than have to statically threshold) we would like to have a probability value between $0$ and $1$. The output layer of the network consists out of two neurons (two classes), one neuron describes the similar faces, the other neuron describes the dissimilar faces. A probability of $0$ means that the faces belong to different persons and a probability of $1$ means that the faces belong to the same person. Binary Cross Entropy loss, or Logaritmic loss (equation \ref{eq:crossentropyloss}) is one of the loss functions that can be used to achieve this.
+We also tried a different approach, instead of using this distance metric (which we would than have to statically threshold) we would like to have a probability value between $0$ and $1$. The output layer of the network consists out of two neurons (two classes), one neuron describes the similar faces, the other neuron describes the dissimilar faces. A probability of $0$ means that the faces belong to different persons and a probability of $1$ means that the faces belong to the same person. Binary Cross Entropy loss, or logarithmic loss (equation \ref{eq:crossentropyloss}) is one of the loss functions that can be used to achieve this.
 
 \begin{equation} \label{eq:crossentropyloss}
   L=-{(y\log(p) + (1 - y)\log(1 - p))}
@@ -78,7 +78,7 @@ There exist a great number of other functions. Some might be better suited for t
 
 Training a neural network takes some time, but the process can be sped up by using graphics processing units (GPU). We were lucky enough to have a dedicated GPU server at our disposal. While training the network is an easy task, we should look out for overfitting or underfitting.
 
-Overfitting a model happens when there are too much parameters for a model or when the training was performed for too long. It will perform poorly on the validation dataset (part of dataset used to detect bad trainig behaviour) while performing excellent on the training dataset. There are two ways of overcoming overfitting. One way is to make the training dataset larger. Having more samples to train on, generalizes the learning model better. The other way is to design the model with fewer parameters, making it less complex. We use learning curves to track the training process of our face matching algortihm. An example of a more or less correct learning curve can be found in figure \ref{fig:trainingcurve}.
+Overfitting a model happens when there are too much parameters for a model or when the training was performed for too long. It will perform poorly on the validation dataset (part of dataset used to detect bad training behavior) while performing excellent on the training dataset. There are two ways of overcoming overfitting. One way is to make the training dataset larger. Having more samples to train on, generalizes the learning model better. The other way is to design the model with fewer parameters, making it less complex. We use learning curves to track the training process of our face matching algorithm. An example of a more or less correct learning curve can be found in figure \ref{fig:trainingcurve}.
 
 \begin{figure}[H]
   \includegraphics{fig/trainingcurve.png}
@@ -92,7 +92,7 @@ As you can see by now, the architecture of a model is extremely important for it
 
 The third step also called the hyperparameter tuning or hyperparameter optimization step, is what makes a good machine learning model even better. This process is not at all logic, experience and intuition can facilitate this. Hyperparameters are all the parameters whose values are set before the learning process begins. There are different methods for optimizing hyperparameters, since we wanted to learn the model and how it behaves relating to small changes in the values of the hyperparameters we went for Manual Random Search. Note that this took us some time because this involves multiple training steps. But since we had a GPU server at our disposal we could parallelize this task. In our case this step improved our accuracy by about 5\%.
 
-We used the Database of Faces\footnote{\url{http://cam-orl.co.uk/facedatabase.html}} to train and test our face matching algortihm. The dataset contains a set of 10 images of frontal faces with different expressions per person and a total of 40 persons. The pictures are in pgm format which is extremely easy to interact with. They have a dimension of 1 x 92 x 112. An example of a set of images from the dataset can be seen in figure \ref{fig:databaseoffaces}. We divided the dataset in to 3 parts: 75\% training, 12.5\% testing and another 12.5\% for validation.
+We used the Database of Faces\footnote{\url{http://cam-orl.co.uk/facedatabase.html}} to train and test our face matching algorithm. The dataset contains a set of 10 images of frontal faces with different expressions per person and a total of 40 persons. The pictures are in PGM (portable graymap) format which is extremely easy to interact with. They have a dimension of 1 x 92 x 112. An example of a set of images from the dataset can be seen in figure \ref{fig:databaseoffaces}. We divided the dataset in to 3 parts: 75\% training, 12.5\% testing and another 12.5\% for validation.
 
 \begin{figure}[H]
   \includegraphics[scale=0.7]{fig/databaseoffacess.png}
@@ -112,7 +112,7 @@ Secure functions or the privacy preserving equivalent of an ordinary function ca
   \label{fig:blackbox}
 \end{figure}
 
-Berry Schoenmakers is a cryptographer working on cryptographic protocols for electronic voting, electronic payments and secure multiparty computation. Since 2018 he has been working on a general MPC implementation for python, called MPyC. This pyhton package can be easily installed with pip: \codeword{pip install mpyc}. The mpyc package defines two new number representation types: SecFxp and SecInt. SecFxp are secure fixed-point numbers. SecInt are secure integers. For more information on how to use this package have a look at the source code at \url{https://github.com/lschoe/mpyc}.
+Berry Schoenmakers is a cryptographer working on cryptographic protocols for electronic voting, electronic payments and secure multiparty computation. Since 2018 he has been working on a general MPC implementation for Python, called MPyC. This pyhton package can be easily installed with pip: \codeword{pip install mpyc}. The mpyc package defines two new number representation types: SecFxp and SecInt. SecFxp are secure fixed-point numbers. SecInt are secure integers. For more information on how to use this package have a look at the source code at \url{https://github.com/lschoe/mpyc}.
 
 There are number of basic functions predefined, like \codeword{add}, \codeword{sub}, \codeword{mul} and \codeword{div}, respectively $+$, $-$, $\times$ and $\div$. As well as \codeword{eq} (equal to), \codeword{ge} (greater than or equal), \codeword{min} and \codeword{max}. The total set of available functions can be found in \codeword{mpyc.runtime.py}. But for our task the functions noted above are all we need.
 
@@ -175,7 +175,7 @@ def relu(X):
     return np.vectorize(lambda a: (a >= 0) * a)(X)
 \end{lstlisting}
 
-Note that writing \codeword{a >= 0} or \codeword{mpc.ge(a, 0)} has the same effect. The same can be said for \codeword{(a >= 0) * a} and \codeword{mpc.mul(a >=0, a)}. The MPC operators are wrapped for the basic python operators on SecInt's and SecFxp's.\\
+Note that writing \codeword{a >= 0} or \codeword{mpc.ge(a, 0)} has the same effect. The same can be said for \codeword{(a >= 0) * a} and \codeword{mpc.mul(a >=0, a)}. The MPC operators are wrapped for the basic Python operators on SecInt's and SecFxp's.\\
 
 These three basic building blocks are essential for a convolutional neural network. But for the MPC protocol to function properly, we need to address some other problems. We will continue by giving a practical overview of the whole MPC protocol.\\
 
@@ -214,7 +214,7 @@ WORKDIR ../
 CMD ["python -u", "./app.py"]
 \end{lstlisting}
 
-The \codeword{app.py} script runs a webserver using the python package flask and a database using the python package pymongo (MongoDB). The webserver will be used to communicate between the device and the server (to launch the MPC protocol, clear the database, ...) while the MongoDB will be used to store the secret shares for that particular server.
+The \codeword{app.py} script runs a webserver using the Python package Flask and a database using the Python package PyMongo (MongoDB). The webserver will be used to communicate between the device and the server (to launch the MPC protocol, clear the database, ...) while the MongoDB will be used to store the secret shares for that particular server.
 
 \begin{lstlisting}[caption={Environment file for servers}, label={lst:env}, frame=single]
 N_PARTIES=3
@@ -257,7 +257,7 @@ def random_split(s, t, m):
 
 The algorithm above splits each secret given by parameter s (list of secrets) into m random Shamir shares. The degree for the Shamir polynomials is t remember  $0 \leq t < n$. The algorithm returns a matrix of shares, one row per party.\\
 
-Finally the user can start the computation by, sending a the appropriate request to one of the parties (listing \ref{lst:devicelaunch}). We make use of the requests package, requests is a simple HTTP library for python it enables us to make requests and get responses over HTTP.
+Finally the user can start the computation by, sending a the appropriate request to one of the parties (listing \ref{lst:devicelaunch}). We make use of the requests package, requests is a simple HTTP library for Python it enables us to make requests and get responses over HTTP.
 
 \begin{lstlisting}[caption={Sending request for secure face matching task}, label={lst:devicelaunch}, frame=single, breaklines=true]
 # Define hosts and ports
@@ -276,7 +276,7 @@ response = requests.get(url)
 # Response contains output of the MPC
 \end{lstlisting}
 
-Note that the HTTP response we get from the GET request contains two variables; the status code and the text. The status code indicates wheter the HTTP request has been  succesfully completed, a valid and succesfull request has a response code of 200. The text of a response is the message that is transferred in the body of the HTTP response. We use the HTTP as means of communication between the device and the server. Note that for more secure implementations, HTTPS (Hypertext Transfer Protocol Secure) is preferred. Since traffic in HTTPS is encrypted using Transport Layer Security (TLS). Using HTTPS denies MITM attacks (man-in-the-middle), a type of attack where a passive attacker tries to eavesdrop certain packets of the traffic.\\
+Note that the HTTP response we get from the GET request contains two variables; the status code and the text. The status code indicates whether the HTTP request has been  successfully completed, a valid and successful request has a response code of 200. The text of a response is the message that is transferred in the body of the HTTP response. We use the HTTP as means of communication between the device and the server. Note that for more secure implementations, HTTPS (Hypertext Transfer Protocol Secure) is preferred. Since traffic in HTTPS is encrypted using Transport Layer Security (TLS). Using HTTPS denies MITM attacks (man-in-the-middle), a type of attack where a passive attacker tries to eavesdrop certain packets of the traffic.\\
 
 The GET query of the request sent in listing \ref{lst:devicelaunch} executes the following code (listing \ref{lst:mpyclaunch}) on the first party or PARTY\_0 (localhost:5000).
 
@@ -332,7 +332,7 @@ def mpyc_launch():
         return "200"
 \end{lstlisting}
 
-The value of the api argument from the GET request determines which MPC script gets excecuted. Then PARTY\_0 starts executing the same code snippet (mpyc\_launch) on the other two parties, by sending the appropriate requests. The first party then executes a new subprocess that runs a the MPC script. The result of the MPC script gets written to the STDOUT stream (standard output) which can be read by the parent process. The result gets parsed in the MPC script, by printing the result between two \$\$\$ tags (like this \$\$\$ result \$\$\$). The other two parties skip most of the code (because their environment variable 'Party' differs from 0) and go straight to executing the same MPC script. Notice that PARTY\_0 plays an important role in establishing that the MPC script runs on the other parties. This centralisation is a clear weakness of this implementation, because a corrupted PARTY\_0 could cause great harm to the correctness of the protocol. But for the sake of simplicity we opt for this more centralised implementation. An overview of this implementation with the different groups (device and server) can be seen in figure \ref{fig:implementationoverview}.
+The return value of the API (Application Programmable Interface) call from the GET request determines which MPC script gets executed. Then PARTY\_0 starts executing the same code snippet (mpyc\_launch) on the other two parties, by sending the appropriate requests. The first party then executes a new subprocess that runs a the MPC script. The result of the MPC script gets written to the STDOUT stream (standard output) which can be read by the parent process. The result gets parsed in the MPC script, by printing the result between two \$\$\$ tags (like this \$\$\$ result \$\$\$). The other two parties skip most of the code (because their environment variable 'Party' differs from 0) and go straight to executing the same MPC script. Notice that PARTY\_0 plays an important role in establishing that the MPC script runs on the other parties. This centralization is a clear weakness of this implementation, because a corrupted PARTY\_0 could cause great harm to the correctness of the protocol. But for the sake of simplicity we opt for this more centralized implementation. An overview of this implementation with the different groups (device and server) can be seen in figure \ref{fig:implementationoverview}.
 
 \begin{figure}[H]
   \includegraphics[scale=0.75]{fig/implementationoverview.png}
@@ -341,9 +341,9 @@ The value of the api argument from the GET request determines which MPC script g
   \label{fig:implementationoverview}
 \end{figure}
 
-Last but not least, we discuss the mpc script that needs to run on the three parties. This script does the actual MPC. Each party holds an identical copy of this script. The parties begin by opening connections with each other (\codeword{mpc.start}). Remember: parties need to communicate with each other in order to output a result or to do non-linear operations such as multiplication of two secure numbers. Then the parties load the unique secret shares for the image and the convolution kernels stored in their MongoDB databases. Since the secret shares are stored in lists in the database, the parties reshape them to the original shape. Then the parties securely compute an output for the input image and kernels on a series of sequential layers (convolution, max pooling and ReLU) made out of the essential building blocks we introduced at the beginning of this chapter. Finally the parties output the result (\codeword{mpc.output}) print the result (printing in python has the same effect as writing to STDOUT) but they do this in a manner such that the stream is parsed. Note that all parties print the result, but only PARTY\_0's STDOUT will be looked at. This is yet another flaw of our implementation. Better would be to look at everybody's STDOUT, to check if anyone is cheating by printing something other than the true result. Finally the parties begin shutting down (mpc.shutdown), closing all open connections. The subprocess will exit, unpausing the parent process. Which will unparse the STDOUT and return the result as a response to the device.\\
+Last but not least, we discuss the MPC script that needs to run on the three parties. This script does the actual MPC. Each party holds an identical copy of this script. The parties begin by opening connections with each other (\codeword{mpc.start}). Remember: parties need to communicate with each other in order to output a result or to do non-linear operations such as multiplication of two secure numbers. Then the parties load the unique secret shares for the image and the convolution kernels stored in their MongoDB databases. Since the secret shares are stored in lists in the database, the parties reshape them to the original shape. Then the parties securely compute an output for the input image and kernels on a series of sequential layers (convolution, max pooling and ReLU) made out of the essential building blocks we introduced at the beginning of this chapter. Finally the parties output the result (\codeword{mpc.output}) print the result (printing in Python has the same effect as writing to STDOUT) but they do this in a manner such that the stream is parsed. Note that all parties print the result, but only PARTY\_0's STDOUT will be looked at. This is yet another flaw of our implementation. Better would be to look at everybody's STDOUT, to check if anyone is cheating by printing something other than the true result. Finally the parties begin shutting down (mpc.shutdown), closing all open connections. The subprocess will exit, unpausing the parent process. Which will unparse the STDOUT and return the result as a response to the device.\\
 
- A basic example of an mpc script that contains all of the points made earlier can be observed in listing \ref{lst:mpcscript}.
+ A basic example of an MPC script that contains all of the points made earlier can be observed in listing \ref{lst:mpcscript}.
 
 \begin{lstlisting}[caption={Example of MPC script for a single CNN layer (conv,maxp and relu)}, label={lst:mpcscript}, frame=single, breaklines=true]
 import math
@@ -386,7 +386,7 @@ In this chapter we discuss how we designed the neural network and why we chose f
 \label{ConvolutionalNeuralNetworkArchitecture}
 In the process of choosing the best architecture for a CNN, we found four suitable models. We will see how each of these models are designed and in what way they differ from the others. Finally, we select one of these models to make it secure using MPC, the selection depends on the following criteria; straightforwardness of the MPC implementation, size of the network (number of parameters), accuracy of the model and the preferred output (distance vector or binary classification).\\
 
-\textbf{General (applies for all models):} The input dimensions of the different neural networks is the same (1 x 100 x 100). The output can differ depending on what loss function is used (cross entropy loss or contrastive loss), but the meaning is the same, wheter a face matches another face or not. And the only difference is how to differentiate between these two classes (match or no match), this means the arbitrary threshold must be chosen on a different basis. To choose a good threshold that reflects the accuracy of the model, we iterate the calculation of the precision and recall for each threhold value in a certain range. This gets us the following curve (figure \ref{fig:threshold}), out of which we can distract the best threshold.\\
+\textbf{General (applies for all models):} The input dimensions of the different neural networks is the same (1 x 100 x 100). The output can differ depending on what loss function is used (cross entropy loss or contrastive loss), but the meaning is the same, whether a face matches another face or not. And the only difference is how to differentiate between these two classes (match or no match), this means the arbitrary threshold must be chosen on a different basis. To choose a good threshold that reflects the accuracy of the model, we iterate the calculation of the precision and recall for each threshold value in a certain range. This gets us the following curve (figure \ref{fig:threshold}), out of which we can distract the best threshold.\\
 
 \begin{figure}[H]
   \includegraphics[scale=0.6]{fig/threshold.png}
@@ -415,7 +415,7 @@ The convolution layers, including Max-pooling (2 x 2 with stride 2) and ReLU aft
 
 Each of these layers have different tasks. The first layers have larger convolution filters, these convolutions detect high-level features like distance or rotation between ears, nose and/or eyes. While the latter, smaller convolution filters detect low-level features like lines or dots (jawline, eyes, mouth).
 
-After the final convolution layer we flatten the output layer to a one-dimensional tensor. This tensor then serves as input for a small fully connected neural network (perceptron), this network can be seen as an extension of the CNN. We use this fully connected neural network to add global spatial correlation (a CNN is good for recognizing structures in local and neighbouring pixels). Since it's important to also important that the algorithm detects two objects or features that belong to each other even though they are seperated and are not local or neighbouring, think of two ears on a face for instance.\\
+After the final convolution layer we flatten the output layer to a one-dimensional tensor. This tensor then serves as input for a small fully connected neural network (perceptron), this network can be seen as an extension of the CNN. We use this fully connected neural network to add global spatial correlation (a CNN is good for recognizing structures in local and neighboring pixels). Since it's important to also important that the algorithm detects two objects or features that belong to each other even though they are separated and are not local or neighboring, think of two ears on a face for instance.\\
 
 The total number of learnable parameters (weights and biases) in this neural network is 154.592, the model doesn't show any sign of overfitting nor underfitting up to 500 epochs.\\
 
@@ -455,7 +455,7 @@ class SiameseNetwork(nn.Module):
         return output1, output2
 \end{lstlisting}
 
-\textbf{CNN with Cross Entropy Loss:} The following model (figure \ref{fig:cnncel}) is similar to the first one we described earlier. The key differences of this model, is that the siamese neural network stops after the last layer. The two output layers get flattened to two single one-dimensional tensors. These tensors then get concatenated. The concatenated tensor now gets sent trough a single fully connected neural network (perceptron).\\
+\textbf{CNN with Cross Entropy Loss:} The following model (figure \ref{fig:cnncel}) is similar to the first one we described earlier. The key differences of this model, is that the Siamese neural network stops after the last layer. The two output layers get flattened to two single one-dimensional tensors. These tensors then get concatenated. The concatenated tensor now gets sent trough a single fully connected neural network (perceptron).\\
 
 \begin{figure}[H]
   \includegraphics[scale=0.7]{fig/cnncel.png}
@@ -464,9 +464,9 @@ class SiameseNetwork(nn.Module):
   \label{fig:cnncel}
 \end{figure}
 
- Note that in the first model (CNN with Contrastive Loss) there is no fusion of the siamese neural network. And the only time the two inputs depend on each other, is when we calculate the euclidean distance between the two output tensors. In fact, this type of model is not really a pure siamese neural network anymore. We guess that the perceptron, placed after the convolution layers, performs some sort of comparison on the two output tensors and we hope this comparison will be better than the standard euclidean distance.\\
+ Note that in the first model (CNN with Contrastive Loss) there is no fusion of the Siamese neural network. And the only time the two inputs depend on each other, is when we calculate the Euclidean distance between the two output tensors. In fact, this type of model is not really a pure Siamese neural network anymore. We guess that the perceptron, placed after the convolution layers, performs some sort of comparison on the two output tensors and we hope this comparison will be better than the standard Euclidean distance.\\
 
- Finally, the cross entropy loss is calculated on the last layer of the model. Since face matching is a binary task (matching or not matching), the last layer contains a single neuron (class). The cross entropy of that neuron returns the chance for that class to be true. The pleasant advantage of cross entropy is that we don't have to set up an arbitrary threshold value, the threshold is simply already decided, for instance if $p \in [0,1]$ than the threshold is equal to $p = 0.5$. If two faces are simmilar, $p=0$. If two faces are dissimilar, $p=1$.\\
+ Finally, the cross entropy loss is calculated on the last layer of the model. Since face matching is a binary task (matching or not matching), the last layer contains a single neuron (class). The cross entropy of that neuron returns the chance for that class to be true. The pleasant advantage of cross entropy is that we don't have to set up an arbitrary threshold value, the threshold is simply already decided, for instance if $p \in [0,1]$ than the threshold is equal to $p = 0.5$. If two faces are similar, $p=0$. If two faces are dissimilar, $p=1$.\\
 
  The convolution layers consist of the same number of convolutions, as the first model:
 
@@ -521,7 +521,7 @@ class SiameseNetwork(nn.Module):
         return output
  \end{lstlisting}
 
-\textbf{Residual Neural Network:} The last model makes use of a special type of deep learning, known as deep residual learning, introduced in 2015 by \cite{he2016deep}. A Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identy function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
+\textbf{Residual Neural Network:} The last model makes use of a special type of deep learning, known as deep residual learning, introduced in 2015 by \cite{he2016deep}. A Residual Neural Network (ResNet) is a special type of neural network that utilizes shortcuts or skip connections shortcuts to jump over a number of layers. Neural networks implementing residual blocks (figure \ref{fig:residualblock}) can have way more layers without running in to problems like vanishing gradient. Vanishing gradient problem occurs when certain parameters of a network do not get updated during training, because the gradient will be so small that it will prevent the parameters from changing. With ResNet a direct link (identity function) can be found over multiple layers, thus creating a way to link certain inputs deeper into the network.
 
 \begin{figure}[H]
   \includegraphics[scale=0.5]{fig/residualblock.png}
@@ -566,7 +566,7 @@ As we said before choosing a neural network depends on a number of factors, we w
 
 Starting with the straightforwardness of the MPC implementation, in other words, how easy will it be to translate the code written with Pytorch to a MPC algorithm using no libraries for neural networks (since Pytorch doesn't support secure datatypes). It's obvious that a ResNet architecture requires more attention to detail and is more complex to implement. The other two neural networks require less attention to detail, thus are more easy to implement.\\
 
-Next, we compare size of the neural network. The neural network's size or it's number of parameters is an equally important factor. Since MPC protocols are way slower than classic computations. We would like our neural network to do fast computations. Fast computations corresponds to less computations, and less computations corresponds to less (or smaller) convolutions or fully connected layers. Thus we would like our network to have a small number of layers, but still enough to be able to differentiate between faces. Since ResNet only adds extra layers, this model is again not preffered. The other two models have about the same number of parameters, and only the fully connected layers have a different number of weights and biases.\\
+Next, we compare size of the neural network. The neural network's size or it's number of parameters is an equally important factor. Since MPC protocols are way slower than classic computations. We would like our neural network to do fast computations. Fast computations corresponds to less computations, and less computations corresponds to less (or smaller) convolutions or fully connected layers. Thus we would like our network to have a small number of layers, but still enough to be able to differentiate between faces. Since ResNet only adds extra layers, this model is again not preferred. The other two models have about the same number of parameters, and only the fully connected layers have a different number of weights and biases.\\
 
 Ranking the neural networks on accuracy (the ability to match faces) was done by testing the four different networks, the results can be seen in table \ref{table:designaccuracy}. We find that when we are using the Contrastive Loss function, the classic CNN as well as the ResNet model is giving us better results than with the Cross Entropy loss function. Overall the ResNet model has a slightly better accuracy than the classic CNN.
 
@@ -670,7 +670,7 @@ def add_bias(tensor, bias):
     return np.add(tensor, bias)
 \end{lstlisting}
 
-The only difference that remains, is that the secure convolution function must allow a combination of input planes. To accomodate for this feature, we define a new method \codeword{conv2d(input, kernel, bias)} that computes the exact same output tensor as the vanilla Pytorch 2D convolution function with only one difference, it being fully encrypted. Notice that we make use of earlier defined methods.
+The only difference that remains, is that the secure convolution function must allow a combination of input planes. To accommodate for this feature, we define a new method \codeword{conv2d(input, kernel, bias)} that computes the exact same output tensor as the vanilla Pytorch 2D convolution function with only one difference, it being fully encrypted. Notice that we make use of earlier defined methods.
 
 \begin{lstlisting}[caption={Code for computing total 2D convolution}, label={lst:conv2d}, frame=single, breaklines=true]
 def conv2d(inputs, kernel, bias):
@@ -683,7 +683,7 @@ def conv2d(inputs, kernel, bias):
 
 For the remaining parts of this thesis, when we talk about one convolution we imply the algorithm stated above (listing~\ref{lst:conv2d}), except when clearly stated.
 
-Of course the convolution needs to be done for each convolution filter on the apropriate set of inputs and in the correct order. Just as in the cleartext algorithm (listing \ref{lst:cnncl}), the convolutions are directly followed by the max pooling layers, which are in turn, followed by the ReLU activation layers. With the help of the three main building blocks of the secure CNN we can build convolutional part of the CNN. The other part, which entails the fully connected layers, doesn't need to be encrypted, since it is nearly impossible to recognize someone from a one dimensional tensor of activations, even with knowledge of the parameters of the neural network. Thus, this latter part can be computed on only one of the three servers or on the clients device. The calculation of the euclidean distance between the two output tensors must be done on the client's device, because this way the fingerprint (output tensor) of the validation face (the face of the image that we would like to match).\\
+Of course the convolution needs to be done for each convolution filter on the appropriate set of inputs and in the correct order. Just as in the cleartext algorithm (listing \ref{lst:cnncl}), the convolutions are directly followed by the max pooling layers, which are in turn, followed by the ReLU activation layers. With the help of the three main building blocks of the secure CNN we can build convolutional part of the CNN. The other part, which entails the fully connected layers, doesn't need to be encrypted, since it is nearly impossible to recognize someone from a one dimensional tensor of activations, even with knowledge of the parameters of the neural network. Thus, this latter part can be computed on only one of the three servers or on the clients device. The calculation of the Euclidean distance between the two output tensors must be done on the client's device, because this way the fingerprint (output tensor) of the validation face (the face of the image that we would like to match).\\
 
 The secure face matching algorithm thus exists out of two parts. The first $n$ encrypted layers make up the first part. The second part includes the rest of the convolutions for which the input tensors are deemed unrecognizable and the fully connected layers. The second part can be computed in the classical way on one of the three servers. MPC is only needed for the first part of the algorithm. This heavily reduces the complexity without compensating for security or privacy.
 
@@ -694,7 +694,7 @@ The secure face matching algorithm thus exists out of two parts. The first $n$ e
   \label{fig:implementation_overview}
 \end{figure}
 
-Our secure face matching algorithm still isn't complete. For a match to be succesfull a test image needs to be matched to a validation image (or base image). We could calculate the embedding (fingerprint) of this validation image for each face matching task by inferring the image through the CNN. But the result would always be the same, since the input doesn't change. Therefore it is sufficient to calculate the fingerprint of the image once and store it for a certain period on the client's device. If the fingerprint of the validation face is never shared and stays on the client's device during all times. Than it is safe to assume that the outcome of the face matching algorithm, a match or not a match, is also secure and private. An overview of this implementation is given in figure \ref{fig:implementation_overview}. The legend describes what parts of the process happen on the client's device or on the servers, and what parts are encrypted or public.
+Our secure face matching algorithm still isn't complete. For a match to be successful, a test image needs to be matched to a validation image (or base image). We could calculate the embedding (fingerprint) of this validation image for each face matching task by inferring the image through the CNN. But the result would always be the same, since the input doesn't change. Therefore it is sufficient to calculate the fingerprint of the image once and store it for a certain period on the client's device. If the fingerprint of the validation face is never shared and stays on the client's device during all times. Than it is safe to assume that the outcome of the face matching algorithm, a match or not a match, is also secure and private. An overview of this implementation is given in figure \ref{fig:implementation_overview}. The legend describes what parts of the process happen on the client's device or on the servers, and what parts are encrypted or public.
 
 \section{Conclusion}
 Implementing a secure face matching algorithm is not a straightforward process. This chapter describes what decisions we made, and what choices led to our implementation of the secure face matching algorithm. Of course there are several ways to implement such a complex task, but we will not be discussing those. A lot of effort has been put in optimizing the algorithm such that three core principles are obeyed:
@@ -705,4 +705,4 @@ Implementing a secure face matching algorithm is not a straightforward process. 
 \item The face matching algorithm must be reliable and accurate.
 \end{enumerate}
 
-If and only if all three of above principles are verifiable, the face mathcing algorithm tends to give good results, is secure and the privacy of the client is protected.
+If and only if all three of above principles are verifiable, the face matching algorithm tends to give good results, is secure and the privacy of the client is protected.
