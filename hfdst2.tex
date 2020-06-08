@@ -87,7 +87,7 @@ Secure multiparty computation is a protocol that is used between $n$ number of p
 \newline
 A classic application is Yao's Millionaires' problem \cite{yao1982protocols} in which two millionaires wish to know who is richer, there is catch however. Instead of making their balances publicly known. They wish to keep their balances a secret. In this case the number of parties $n$ is 2 the secrets $s_0$ and $s_1$ are their balances. The public function $f(s_0,s_1)=1$ if $s_0<s_1$ and $0$ otherwise.
 
-We categorize 2 types of parties based on their willingness to deviate from the correct predefined protocol.
+We categorize two different types of parties based on their willingness to deviate from the correct predefined protocol.
 \begin{itemize}
   \item \textbf{Honest parties:} Parties do not wish to know other parties secrets and will never reveal the secret.
   \item \textbf{Honest but curious parties (passive):} Parties wish to know other parties secrets but will not deviate from the protocol at any time. Also called semi-honest parties.

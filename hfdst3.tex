@@ -1,4 +1,4 @@
-Euclidean%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                 %
 %                            CHAPTER                              %
 %                                                                 %
@@ -11,6 +11,7 @@ Euclidean%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
 \chapter{Implementation}
+\label{chapter:implementation}
 In this chapter we will explain how we implemented MPC for face matching algorithms. We will do this by giving a high-level overview of the system and then diving deeper in more interesting parts. We also show some techniques to lose some complexity without losing too much accuracy. With the information in this chapter and the code in the appendix, you should be able to reproduce our experiments. Feel free to checkout our code by cloning our GitHub repository\footnote{\url{https://github.com/Fluxmux/securefacematching}}.
 
 \section{Specifications}
@@ -192,7 +193,6 @@ The parties can be simulated by using three different Docker containers (figure 
 
 \begin{lstlisting}[caption={Docker files for servers}, label={lst:docker}, frame=single]
 FROM tsutomu7/scientific-python
-MAINTAINER Carlton Shepherd "carlton.shepherd@onespan.com"
 COPY . /app
 
 # Install requirements
@@ -683,7 +683,7 @@ def conv2d(inputs, kernel, bias):
 
 For the remaining parts of this thesis, when we talk about one convolution we imply the algorithm stated above (listing~\ref{lst:conv2d}), except when clearly stated.
 
-Of course the convolution needs to be done for each convolution filter on the appropriate set of inputs and in the correct order. Just as in the cleartext algorithm (listing \ref{lst:cnncl}), the convolutions are directly followed by the max pooling layers, which are in turn, followed by the ReLU activation layers. With the help of the three main building blocks of the secure CNN we can build convolutional part of the CNN. The other part, which entails the fully connected layers, doesn't need to be encrypted, since it is nearly impossible to recognize someone from a one dimensional tensor of activations, even with knowledge of the parameters of the neural network. Thus, this latter part can be computed on only one of the three servers or on the clients device. The calculation of the Euclidean distance between the two output tensors must be done on the client's device, because this way the fingerprint (output tensor) of the validation face (the face of the image that we would like to match).\\
+Of course the convolution needs to be done for each convolution filter on the appropriate set of inputs and in the correct order. Just as in the cleartext algorithm (listing \ref{lst:cnncl}), the convolutions are directly followed by the max pooling layers, which are in turn, followed by the ReLU activation layers. With the help of the three main building blocks of the secure CNN we can build convolutional part of the CNN. The other part, which entails the fully connected layers, doesn't need to be encrypted, since it is nearly impossible to recognize someone from a one dimensional tensor of activations, even with knowledge of the parameters of the neural network. Thus, this latter part can be computed on only one of the three servers or on the clients device. The calculation of the Euclidean distance between the two output tensors must be done on the client's device, because this way the fingerprint (output tensor) of the validation face (the face of the image that we would like to match) can be computed.\\
 
 The secure face matching algorithm thus exists out of two parts. The first $n$ encrypted layers make up the first part. The second part includes the rest of the convolutions for which the input tensors are deemed unrecognizable and the fully connected layers. The second part can be computed in the classical way on one of the three servers. MPC is only needed for the first part of the algorithm. This heavily reduces the complexity without compensating for security or privacy.
 

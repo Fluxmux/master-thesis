@@ -12,14 +12,14 @@ Echter zijn gebruikers bezorgd over de betrouwbaarheid van hoe met deze biometri
 
 We zijn op zoek naar een manier om de data van de gebruiker te encrypteren op een manier waardoor men nog steeds een gezichtsherkenningsalgoritme op deze ge\"encrypteerde data kunnen laten uitvoeren (figuur \ref{fig:dutch_intro_overview}). De derde partij die dit algoritme uitvoert zal niet in staat zijn om de data te kunnen decrypteren om de afbeelding van het gezicht van de gebruiker te kunnen lezen.\\
 
-We stellen volgende hypotheses op:
+We stellen volgende onderzoeksvragen op:
 
 \begin{itemize}
   \item Hoe kunnen we op een privacy behoudende wijze, een gezichtsherkenningsalgoritme gebaseerd op Deep Learning, laten uitvoeren op ge\"encrypteerde data?
   \item Hoe kunnen we dit privacy behoudende algoritme optimaliseren om het effici\"enter uit te voeren?
 \end{itemize}
 
-In de loop van de thesis zullen we een antwoord proberen te vinden op beide hypotheses.\\\\
+In de loop van de thesis zullen we een antwoord proberen te vinden op beide onderzoeksvragen.\\\\
 
 \textbf{\Large{Literatuurstudie}}\\\\
 Machine learning is een technologie die gebruikt wordt in computer visie om objecten te detecteren en te herkennen. Een state of the art gezichtsherkenningsalgoritme maakt gebruik van Deep Learning een tak van Machine Learning. Het onderscheidt zich van klassieke neurale netwerken, door de grote hoeveelheid lagen die het netwerk telt. Meestal gaat dit gepaard met een hogere accuraatheid ten koste van een hogere complexiteit.
@@ -69,7 +69,7 @@ MPyC is het framework dat al enkele van de standaard secure multiparty computati
 Tenslotte stellen we enkele manieren voor om het privacy behoudende gezichtsherkenningsalgoritme te optimaliseren. De meest effici\"ente methode is om convoluties die weinig of niets doen weg te laten. Dit principe heet pruning.\\\\
 
 \textbf{\Large{Resultaten en Conclusie}}\\
-We hebben in dit project drie aparte experimenten uitgevoerd. In het eerste experiment proberen we aan de hand van twee convoluties een afbeelding te verscherpen. De convolutiefilters zijn zo ingesteld dat ze horizontale en verticale lijnen uit een afbeelding halen. Deze worden dan vermenigvuldigt met een factor en bij de originele afbeelding toegevoegd. Natuurlijk volledig privacy behoudend. Zowel de input als de parameters van de convolutiefilters blijven geheim. Hierdoor onstaat er een verscherpte afbeelding. De twee convoluties op een zwart-wit afbeelding van 100 bij 100 duren iets langer dan een minuut.
+We hebben in dit project drie aparte experimenten uitgevoerd. In het eerste experiment proberen we aan de hand van twee convoluties een afbeelding te verscherpen. De convolutiefilters zijn zo ingesteld dat ze horizontale en verticale lijnen uit een afbeelding halen. Deze worden dan vermenigvuldigd met een factor en bij de originele afbeelding toegevoegd. Natuurlijk volledig privacy behoudend. Zowel de input als de parameters van de convolutiefilters blijven geheim. Hierdoor onstaat er een verscherpte afbeelding. De twee convoluties op een zwart-wit afbeelding van 100 bij 100 duren iets langer dan een minuut.
 
 Het tweede experiment omvat het testen van de verschillende operaties die voorkomen in convolutionele neurale netwerken (ReLU, max pooling en convoluties) en het delen en reconstrueren van de shares. Hieruit merken we dat convoluties veel meer tijd nemen dan gedacht en aangezien een convolutioneel neuraal netwerk bestaat uit een groot aantal convoluties is dit niet positief.
 

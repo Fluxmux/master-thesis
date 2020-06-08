@@ -13,7 +13,7 @@ Secure multiparty computation (MPC) is a subfield of cryptography, making it pos
 
 Secure Multiparty Computation and Machine Learning aren't new concepts, in fact they exist for over 40 years. But with the rise of big data and processing power lately, there has been an increase in research into these fields.
 
-Because of these concerns researchers are looking for technologies to enhance the privacy of the user during the processing of it's data on a server.
+Because of these concerns researchers are looking for technologies to enhance the privacy of the user during the processing of its data on a server.
 
 Onespan\footnote{Onespan's official website: \url{https://www.onespan.com}} (formerly VASCO Data Security International, Inc.) is a global company were most of our research was done. Onespan offers a series of security and authentication products and technologies and specializes in digital identity and anti-fraud solutions. The company continues to be active in research and innovation in different fields of technology, especially cryptography and data science.
 
@@ -30,7 +30,10 @@ Furthermore the whole design of the neural network including all trained paramet
 
 In this thesis we try to tackle the need to trust a third party MLaaS provider. We want it to compute an encrypted image on an obfuscated neural network to output a correct encrypted result. This encrypted result shall be sent to the client, which will then decrypt it.\\
 
-In figure \ref{fig:workflow} a high-level workflow of secure face recognition is shown. The MPC protocol works for three parties, who each have their own computing instance connected to the MPC network and the client. The workflow commences by acquiring an image of the clients face, this can be done by taking a photograph with the front-facing camera of the clients smartphone. The client then performs secret sharing on the image and sends the shared secret to the participating parties. The parties receive their shares and jointly compute the output of the face recognition model on the given shared image of the face. The face recognition model can be public or secret. In the case of a secret model, the secret shares of the weights and biases need to be sent to the participating parties as well. Note that this only has to be done once, during initialization. After the computation is finished, the parties send their resulting secret shares to the client. The client interpolates the shares to find the secret values determining if her face matches or not.
+In order to make the entire processing chain secure, the basic principle we follow is that the input image data is encrypted by splitting it up in a number (e.g. 3) of data parts (called shares), which are unable to be interpreted individually, but can only be decrypted by combining all parts together again. Because of the properties these parts share, certain operations can be performed on these separate shares. This concept allows us to perform a multitude of operations on encrypted data. Following the MPC protocol, we can execute the CNN calculations in encrypted space, performing all necessary calculations on each of these shares individually, without the need of deciphering. The resulting shares of the CNN, then get recombined to decrypt the result.
+
+
+In figure \ref{fig:workflow} a high-level workflow of secure face recognition is shown. The MPC protocol works for three parties, who each have their own computing instance connected to the MPC network and the client. The workflow commences by acquiring an image of the client's face, this can be done by taking a photograph with the front-facing camera of the client's smartphone. The client then performs secret sharing on the image and sends the shared secret to the participating parties. The parties receive their shares and jointly compute the output of the face recognition model on the given shared image of the face. The face recognition model can be public or secret. In the case of a secret model, the secret shares of the weights and biases need to be sent to the participating parties as well. Note that this only has to be done once, during initialization. After the computation is finished, the parties send their resulting secret shares to the client. The client interpolates the shares to find the secret values determining if her face matches or not.
 
 \begin{figure}[H]
   \includegraphics[width=\linewidth]{fig/workflow.png}
@@ -40,7 +43,7 @@ In figure \ref{fig:workflow} a high-level workflow of secure face recognition is
 
 This protocol ensures that the client is the only one having knowledge about the cleartext of the image and the output of the face recognition algorithm. This protocol also offers an obfuscation of the model's parameters, the parties and the client have no knowledge about the parameters if the owner of the model uses secret sharing to send the parameters to the parties.\\
 
-Before we begin specifying our hypotheses, lets define some frequently occurring terms:
+Before we begin specifying our hypotheses, let's define some frequently occurring terms:
 
 \begin{itemize}
   \item Encryption: the process of converting data into a code, to ensure confidentiality and prevent unauthorized access.
@@ -48,10 +51,21 @@ Before we begin specifying our hypotheses, lets define some frequently occurring
   \item Face matching algorithm: Set of rules that a computer uses to compare two faces, to determine whether there is a match.
 \end{itemize}
 
-\section{Hypothesis}
+\section{Research Questions}
 \label{chapter:hypothesis}
 \paragraph{How can we securely compute the inference of a deep learning-based facial recognition neural network?}\mbox{} \\
-With the use of MPC protocols we can implement methods such that we can compute a whole face recognition convolutional neural network on an encrypted image of a face. This preserves the privacy of the user while allowing the computation to be outsourced to an untrusted third party.
+In  this thesis we will investigate if it is possible to use MPC to implement methods such that we can compute a whole face recognition convolutional neural network on an encrypted image of a face. This preserves the privacy of the user while allowing the computation to be outsourced to an untrusted third party.
 \paragraph{How can we optimize the secure facial recognition task to run more efficiently?}\mbox{}
 \\
 We predict a drastic decrease in performance when running inference on the privacy-preserving neural network, because MPC is a protocol over a network of parties the computational time will not be the only factor to account for. We will try to find performance optimizations along the way of implementing a proof of concept by looking at existing optimization concepts for MPC as well as optimization solutions for neural networks.
+
+
+\section{Thesis Overview}
+
+We describe the workings of CNN's and MPC in \ref{chapter:literature}. In this chapter, we also compare the research advances of slightly different projects.
+
+Chapter \ref{chapter:implementation} consists of detailed descriptions of our implementation. Certain aspects of our code are explained and a more into depth specification of the algorithm as a whole is given.
+
+The results along with the problems we encountered during the building and testing phase of our algorithm are described in chapter \ref{chapter:evaluation}.
+
+Finally we conclude our work by giving an answer to our request questions (chapter \ref{chapter:conclusion}).

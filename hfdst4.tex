@@ -33,7 +33,7 @@ To ensure that the secure face matching algorithm works as intended, all softwar
 Image sharpening is a classic computer vision task. The task can be completed using convolutions. The process goes as follows: First we extract the horizontal lines or edges from an image by using a certain convolution mask (figure \ref{fig:sharp_mask}). We do the same thing for the vertical lines in the image. Adding these outputs gives us a detailed version of the input image, where only vertical and horizontal lines are left over. The detailed image than gets multiplied by a factor between 0 and 1. Finally the detailed image gets added to the input image, the result is a sharpened version of the original image.
 
 \begin{figure}[H]
-  \includegraphics[scale=0.2]{fig/sharp_mask.png}
+  \includegraphics[scale=0.1]{fig/sharp_mask.png}
   \centering
   \caption{Convolution filters used for extracting sharp details out of images}
   \label{fig:sharp_mask}
